@@ -4,7 +4,7 @@ import { cose, decodeAttestationObject, decodeCredentialPublicKey, isoBase64URL,
 import { v4 as uuidv4 } from "uuid";
 import { encodeAbiParameters, stringToBytes, toHex } from "viem";
 
-export const PASSKEY_RP_ID = 'localhost';
+export const PASSKEY_RP_ID = import.meta.env.PASSKEY_RP_ID as string;
 
 export async function startPasskeyRegistration() {
   const options = await generateRegistrationOptions({
