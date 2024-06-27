@@ -1,4 +1,4 @@
-import { useAccount, useConnect, useDisconnect, useWalletClient } from "wagmi";
+import { useAccount, useConfig, useConnect, useDisconnect, useWalletClient } from "wagmi";
 import { startPasskeyRegistration } from "./util/startPasskeyRegistration";
 import { useState } from "react";
 import { Hex, concat, hexToBytes, stringToHex } from "viem";
@@ -14,6 +14,8 @@ import { base58 } from "@scure/base";
 
 function App() {
   const account = useAccount();
+  const config = useConfig()
+  console.log('account', account)
   const { connectors, connect, status, error } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: walletClient } = useWalletClient();
@@ -29,51 +31,40 @@ function App() {
     enabled: userOpHash !== "0x",
     refetchInterval: 1000,
   });
+  console.log('config', config, account)
 
   const createSession = async () => {
-    const { publicKey: newSigner, credentialID: newCredentialId } =
-      await startPasskeyRegistration();
     const wallet = connectors[0];
-    await wallet.connect({
+    const x = await wallet.connect({
       requests: [
         { message: "Sign in" },
         {
           permissions: {
             expiry: 1577840461,
+            chainId: 84532,
             signer: {
-              type: "key",
-              data: {
-                id: newSigner,
-              },
+              type: "wallet",
             },
             permissions: [
               {
-                type: "compliance-function",
-                data: {},
-                policies: [
-                  {
-                    type: "native-token-transfer",
-                    data: {
-                      value: "0x100",
-                    },
-                  },
-                  {
-                    type: "contract-call",
-                    data: {
-                      address: "0x...",
-                      calls: [
-                        "function sessionCall(bytes calldata data) external",
-                      ],
-                    },
-                  },
-                ],
-                required: true,
-              },
-            ],
+                  required: true,
+                  type: "session-call",
+                  data: {},
+                  policies: [
+                      {
+                          type: "native-token-spend-limit",
+                          data: {
+                              value: "0x100",
+                          },
+                      }
+                  ]
+              }
+          ]
           },
         },
       ],
     });
+    console.log('lukas', x)
     // if (walletClient) {
     //   const { publicKey: newSigner, credentialID: newCredentialId } =
     //     await startPasskeyRegistration();
@@ -135,25 +126,25 @@ function App() {
   };
 
   const mint = async () => {
-    if (address && credentialID) {
-      setSubmitted(true);
-      const { hash, userOp } = await getUserOpHashForMint(address);
-      const options = await getAuthOptions(hash, credentialID);
-      const signature = await signUserOp(options, address);
-      const userOpToSubmit = { ...userOp, signature };
-      const submittedUserOpHash = await bundlerClient.sendUserOperation({
-        userOperation: userOpToSubmit,
-      });
-      setUserOpHash(submittedUserOpHash);
-      setSubmitted(false);
-    }
+    // if (address && credentialID) {
+    //   setSubmitted(true);
+    //   const { hash, userOp } = await getUserOpHashForMint(address);
+    //   const options = await getAuthOptions(hash, credentialID);
+    //   const signature = await signUserOp(options, address);
+    //   const userOpToSubmit = { ...userOp, signature };
+    //   const submittedUserOpHash = await bundlerClient.sendUserOperation({
+    //     userOperation: userOpToSubmit,
+    //   });
+    //   setUserOpHash(submittedUserOpHash);
+    //   setSubmitted(false);
+    // }
   };
 
   return (
     <div className="bg-blue-700 h-screen w-screen flex flex-col items-center justify-center text-white relative">
       <div className="absolute top-4 right-4">
-        {address && <span className="text-lg">{truncateMiddle(address)}</span>}
-        {!address && (
+        {account.address && <span className="text-lg">{truncateMiddle(account.address)}</span>}
+        {!account.address && (
           <button
             className="bg-white text-black p-2 rounded-lg w-36 text-lg"
             onClick={createSession}
@@ -165,8 +156,8 @@ function App() {
       </div>
 
       <div className="div flex flex-col items-center justify-center space-y-8">
-        {!address && <h2 className="text-xl">Session key demo</h2>}
-        {address && (
+        {!account.address && <h2 className="text-xl">Session key demo</h2>}
+        {account.address && (
           <>
             <button
               className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"

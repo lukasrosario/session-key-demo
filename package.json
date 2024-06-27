@@ -39,8 +39,8 @@
     "vite": "^4.4.9"
   },
   "resolutions": {
-    "@wagmi/connectors": "npm:@lukasrosario/connectors@11.0.0",
+    "@wagmi/connectors": "npm:@lukasrosario/connectors@13.0.0",
     "@wagmi/core": "npm:@lukasrosario/core@4.0.1",
-    "@coinbase/wallet-sdk": "npm:@lukasrosario/wallet-sdk@14.0.0"
+    "@coinbase/wallet-sdk": "npm:@lukasrosario/wallet-sdk@37.0.0"
   }
 }
