@@ -1,7 +1,7 @@
 import { useAccount, useConfig, useConnect, useDisconnect, useWalletClient } from "wagmi";
 import { startPasskeyRegistration } from "./util/startPasskeyRegistration";
 import { useState } from "react";
-import { Hex, concat, hexToBytes, stringToHex } from "viem";
+import { Hex, WalletClient, concat, hexToBytes, stringToHex } from "viem";
 import {
   bundlerClient,
   getUserOpHashForMint,
@@ -11,14 +11,17 @@ import { getAuthOptions } from "./util/getAuthOptions";
 import { signUserOp } from "./util/signUserOp";
 import { useQuery } from "@tanstack/react-query";
 import { base58 } from "@scure/base";
+import { sendCalls } from "viem/experimental";
+import { baseSepolia } from "viem/chains";
+import { connect } from "wagmi/actions";
 
 function App() {
   const account = useAccount();
   const config = useConfig()
   console.log('account', account)
-  const { connectors, connect, status, error } = useConnect();
+  const { connectors, status, error } = useConnect();
   const { disconnect } = useDisconnect();
-  const { data: walletClient } = useWalletClient();
+  const { data: walletClient } = useWalletClient({chainId: 84532});
   const [isSessionCreate, setIsSessionCreated] = useState(false);
   const [publicKey, setPublicKey] = useState<Hex | undefined>();
   const [credentialID, setCredentialID] = useState<string | undefined>();
@@ -34,37 +37,33 @@ function App() {
   console.log('config', config, account)
 
   const createSession = async () => {
-    const wallet = connectors[0];
-    const x = await wallet.connect({
-      requests: [
-        { message: "Sign in" },
-        {
-          permissions: {
-            expiry: 1577840461,
-            chainId: 84532,
-            signer: {
-              type: "wallet",
-            },
-            permissions: [
-              {
-                  required: true,
-                  type: "session-call",
-                  data: {},
-                  policies: [
-                      {
-                          type: "native-token-spend-limit",
-                          data: {
-                              value: "0x100",
-                          },
-                      }
-                  ]
-              }
-          ]
+    const x = await connect(config, {connector: connectors[0], requests: [
+      { message: "Sign in" },
+      {
+        permissions: {
+          expiry: 1577840461,
+          chainId: 84532,
+          signer: {
+            type: "wallet",
           },
+          permissions: [
+            {
+                required: true,
+                type: "session-call",
+                data: {},
+                policies: [
+                    {
+                        type: "native-token-spend-limit",
+                        data: {
+                            value: "0x100",
+                        },
+                    }
+                ]
+            }
+        ]
         },
-      ],
-    });
-    console.log('lukas', x)
+      },
+    ] })
     // if (walletClient) {
     //   const { publicKey: newSigner, credentialID: newCredentialId } =
     //     await startPasskeyRegistration();
@@ -126,6 +125,13 @@ function App() {
   };
 
   const mint = async () => {
+    if (account.address) {
+      sendCalls(walletClient as WalletClient, {
+        account: account.address,
+        chain: baseSepolia,
+        calls:[{data: '0x02'}]
+      })
+    }
     // if (address && credentialID) {
     //   setSubmitted(true);
     //   const { hash, userOp } = await getUserOpHashForMint(address);
