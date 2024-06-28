@@ -1,16 +1,7 @@
-import { useAccount, useConfig, useConnect, useDisconnect, useWalletClient } from "wagmi";
-import { startPasskeyRegistration } from "./util/startPasskeyRegistration";
+import { useAccount, useConfig, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
-import { Hex, WalletClient, concat, hexToBytes, stringToHex, WalletGrantPermissionsReturnType, } from "viem";
-import {
-  bundlerClient,
-  getUserOpHashForMint,
-} from "./util/getUserOpHashForMint";
+import { WalletClient, WalletGrantPermissionsReturnType, } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
-import { getAuthOptions } from "./util/getAuthOptions";
-import { signUserOp } from "./util/signUserOp";
-import { useQuery } from "@tanstack/react-query";
-import { base58 } from "@scure/base";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
 import { connect } from "wagmi/actions";
@@ -18,22 +9,10 @@ import { connect } from "wagmi/actions";
 function App() {
   const account = useAccount();
   const config = useConfig()
-  const { connectors, status, error } = useConnect();
+  const { connectors } = useConnect();
   const [permissionsContext, setPermissionsContext] = useState('')
-  const { disconnect } = useDisconnect();
   const { data: walletClient } = useWalletClient({chainId: 84532});
-  const [isSessionCreate, setIsSessionCreated] = useState(false);
-  const [publicKey, setPublicKey] = useState<Hex | undefined>();
-  const [credentialID, setCredentialID] = useState<string | undefined>();
-  const [address, setAddress] = useState<Hex | undefined>();
-  const [userOpHash, setUserOpHash] = useState<Hex>("0x");
   const [submitted, setSubmitted] = useState(false);
-  const { data: userOpReceipt } = useQuery({
-    queryKey: ["opReceipt", userOpHash],
-    queryFn: () => bundlerClient.getUserOperationReceipt({ hash: userOpHash }),
-    enabled: userOpHash !== "0x",
-    refetchInterval: 1000,
-  });
 
   const createSession = async () => {
     const response = await connect(config, {connector: connectors[0], requests: [
@@ -67,69 +46,12 @@ function App() {
       return request instanceof Object && 'permissionsContext' in request
     })) as WalletGrantPermissionsReturnType).permissionsContext
     setPermissionsContext(context)
-    // if (walletClient) {
-    //   const { publicKey: newSigner, credentialID: newCredentialId } =
-    //     await startPasskeyRegistration();
-    //   // const [sessionAddress] = (await walletClient.request({
-    //   //   method: "wallet_grantPermissions",
-    //   //   params: {
-    //   //     signer: { publicKey: newSigner, credentialId: newCredentialId },
-    //   //   },
-    //   // })) as [Hex];
-    //   await walletClient.request({
-    //     method: 'wallet_sendCalls',
-    //     params: {
-    //       requests: [
-    //         {
-    //           method: 'personal_sign',
-    //           params: [stringToHex('Sign in')],
-    //         },
-    //         {
-    //           method: 'wallet_grantPermissions',
-    //           params: {
-    //             signer: {
-    //               type: 'key',
-    //               data: {
-    //                 id: newSigner,
-    //               }
-    //             },
-    //             permissions: [
-    //               {
-    //                 type: 'compliance-function',
-    //                 policies: [
-    //                   {
-    //                     type: 'native-token-transfer',
-    //                     data: {
-    //                       value: '0x100'
-    //                     }
-    //                   },
-    //                   {
-    //                     type: 'contract-call',
-    //                     data: {
-    //                       address: '0x...',
-    //                       calls: ['function sessionCall(bytes calldata data) external']
-    //                     }
-    //                   },
-    //                 ],
-    //                 required: true,
-    //               }
-    //             ],
-    //             expiry: 1577840461
-    //           }
-    //         }
-    //       ]
-    //     }
-    //   })
-    //   // setPublicKey(newSigner);
-    //   // setCredentialID(newCredentialId);
-    //   // setIsSessionCreated(true);
-    //   // setAddress(sessionAddress);
-    // }
   };
 
   const mint = async () => {
     if (account.address) {
-      const id = await sendCalls(walletClient as WalletClient, {
+      setSubmitted(true)
+      await sendCalls(walletClient as WalletClient, {
         account: account.address,
         chain: baseSepolia,
         calls:[{
@@ -143,19 +65,8 @@ function App() {
           }
         }
       })
+      setSubmitted(false)
     }
-    // if (address && credentialID) {
-    //   setSubmitted(true);
-    //   const { hash, userOp } = await getUserOpHashForMint(address);
-    //   const options = await getAuthOptions(hash, credentialID);
-    //   const signature = await signUserOp(options, address);
-    //   const userOpToSubmit = { ...userOp, signature };
-    //   const submittedUserOpHash = await bundlerClient.sendUserOperation({
-    //     userOperation: userOpToSubmit,
-    //   });
-    //   setUserOpHash(submittedUserOpHash);
-    //   setSubmitted(false);
-    // }
   };
 
   return (
@@ -185,16 +96,6 @@ function App() {
             >
               Mint!
             </button>
-            {userOpReceipt?.receipt.transactionHash && (
-              <a
-                href={`https://basescan.org/tx/${userOpReceipt.receipt.transactionHash}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-text-white"
-              >
-                View transaction
-              </a>
-            )}
           </>
         )}
       </div>
