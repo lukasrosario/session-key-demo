@@ -1,7 +1,7 @@
 import { useAccount, useConfig, useConnect, useDisconnect, useWalletClient } from "wagmi";
 import { startPasskeyRegistration } from "./util/startPasskeyRegistration";
 import { useState } from "react";
-import { Hex, WalletClient, concat, hexToBytes, stringToHex } from "viem";
+import { Hex, WalletClient, concat, hexToBytes, stringToHex, WalletGrantPermissionsReturnType, } from "viem";
 import {
   bundlerClient,
   getUserOpHashForMint,
@@ -19,6 +19,7 @@ function App() {
   const account = useAccount();
   const config = useConfig()
   const { connectors, status, error } = useConnect();
+  const [permissionsContext, setPermissionsContext] = useState('')
   const { disconnect } = useDisconnect();
   const { data: walletClient } = useWalletClient({chainId: 84532});
   const [isSessionCreate, setIsSessionCreated] = useState(false);
@@ -62,7 +63,10 @@ function App() {
         },
       },
     ] })
-    console.log('lukas', response)
+    const context = (response.requestResponses.find(((request) => {
+      return request instanceof Object && 'permissionsContext' in request
+    })) as WalletGrantPermissionsReturnType).permissionsContext
+    setPermissionsContext(context)
     // if (walletClient) {
     //   const { publicKey: newSigner, credentialID: newCredentialId } =
     //     await startPasskeyRegistration();
@@ -125,10 +129,19 @@ function App() {
 
   const mint = async () => {
     if (account.address) {
-      sendCalls(walletClient as WalletClient, {
+      const id = await sendCalls(walletClient as WalletClient, {
         account: account.address,
         chain: baseSepolia,
-        calls:[{data: '0x02'}]
+        calls:[{
+          to: '0x416EDD85FA37A3bE56b9fE95B996359B539dA1A3',
+          value: 0n,
+          data: '0x7bc361a300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000044beebc5da0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000'
+        }],
+        capabilities: {
+          permissions: {
+            context: permissionsContext
+          }
+        }
       })
     }
     // if (address && credentialID) {
