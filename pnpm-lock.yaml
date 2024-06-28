@@ -7,7 +7,7 @@ settings:
 overrides:
   '@wagmi/connectors': npm:@lukasrosario/connectors@14.0.0
   '@wagmi/core': npm:@lukasrosario/core@8.0.0
-  '@coinbase/wallet-sdk': npm:@lukasrosario/wallet-sdk@58.0.0
+  '@coinbase/wallet-sdk': npm:@lukasrosario/wallet-sdk@65.0.0
 
 importers:
 
@@ -1260,8 +1260,8 @@ packages:
       typescript:
         optional: true
 
-  '@lukasrosario/wallet-sdk@58.0.0':
-    resolution: {integrity: sha512-8Z8ia0h8PVrp1WOXPo0VYx7ko4sIHFUxW2orJGegVJgY6ezABHFomd3rANPxWs29vgpz5rXvQnAD55vBkW8GfA==}
+  '@lukasrosario/wallet-sdk@65.0.0':
+    resolution: {integrity: sha512-woKiurFcH6TiosnJd3wDFv74jlcBB9SVuXzWttcWacCVKHiP6Zxfrb0z//JxmMMlDe6l+7t3jitsqtRoGTMWBQ==}
 
   '@metamask/eth-json-rpc-provider@1.0.1':
     resolution: {integrity: sha512-whiUMPlAOrVGmX8aKYVPvlKyG4CpQXiNNyt74vE1xb5sPvmx5oA7B/kOi/JdBvhGQq97U1/AVdXEdk2zkP8qyA==}
@@ -5824,7 +5824,7 @@ snapshots:
 
   '@lukasrosario/connectors@14.0.0(@lukasrosario/core@8.0.0(@tanstack/query-core@5.0.5)(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.5.2)(utf-8-validate@6.0.4)(viem@2.16.3(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8))(zod@3.23.8))(@types/react@18.3.3)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-i18next@13.5.0(i18next@22.5.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(rollup@3.29.4)(typescript@5.5.2)(utf-8-validate@6.0.4)(viem@2.16.3(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8))(zod@3.23.8)':
     dependencies:
-      '@coinbase/wallet-sdk': '@lukasrosario/wallet-sdk@58.0.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8)'
+      '@coinbase/wallet-sdk': '@lukasrosario/wallet-sdk@65.0.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8)'
       '@metamask/sdk': 0.26.2(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-i18next@13.5.0(i18next@22.5.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(rollup@3.29.4)(utf-8-validate@6.0.4)
       '@safe-global/safe-apps-provider': 0.18.1(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8)
       '@safe-global/safe-apps-sdk': 8.1.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8)
@@ -5879,7 +5879,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@lukasrosario/wallet-sdk@58.0.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8)':
+  '@lukasrosario/wallet-sdk@65.0.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@6.0.4)(zod@3.23.8)':
     dependencies:
       '@noble/curves': 1.4.0
       '@simplewebauthn/browser': 10.0.0

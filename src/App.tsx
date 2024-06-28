@@ -19,7 +19,7 @@ function App() {
       { message: "Sign in" },
       {
         permissions: {
-          expiry: 1577840461,
+          expiry: 95778400000,
           chainId: 84532,
           signer: {
             type: "wallet",
