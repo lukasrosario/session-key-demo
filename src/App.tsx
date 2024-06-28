@@ -18,7 +18,6 @@ import { connect } from "wagmi/actions";
 function App() {
   const account = useAccount();
   const config = useConfig()
-  console.log('account', account)
   const { connectors, status, error } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: walletClient } = useWalletClient({chainId: 84532});
@@ -34,10 +33,9 @@ function App() {
     enabled: userOpHash !== "0x",
     refetchInterval: 1000,
   });
-  console.log('config', config, account)
 
   const createSession = async () => {
-    const x = await connect(config, {connector: connectors[0], requests: [
+    const response = await connect(config, {connector: connectors[0], requests: [
       { message: "Sign in" },
       {
         permissions: {
@@ -64,6 +62,7 @@ function App() {
         },
       },
     ] })
+    console.log('lukas', response)
     // if (walletClient) {
     //   const { publicKey: newSigner, credentialID: newCredentialId } =
     //     await startPasskeyRegistration();

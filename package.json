@@ -41,6 +41,6 @@
   "resolutions": {
     "@wagmi/connectors": "npm:@lukasrosario/connectors@14.0.0",
     "@wagmi/core": "npm:@lukasrosario/core@6.0.0",
-    "@coinbase/wallet-sdk": "npm:@lukasrosario/wallet-sdk@38.0.0"
+    "@coinbase/wallet-sdk": "npm:@lukasrosario/wallet-sdk@39.0.0"
   }
 }
