@@ -52,6 +52,7 @@ function App() {
   const mint = async () => {
     if (account.address) {
       setSubmitted(true)
+      setUserOpHash(undefined)
       try {
         const userOpHash = await sendCalls(walletClient as WalletClient, {
           account: account.address,
