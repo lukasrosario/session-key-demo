@@ -1,6 +1,6 @@
 import { useAccount, useConfig, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
-import { WalletClient, WalletGrantPermissionsReturnType, } from "viem";
+import { WalletClient, WalletGrantPermissionsReturnType, parseUnits, } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
@@ -13,6 +13,7 @@ function App() {
   const [permissionsContext, setPermissionsContext] = useState('')
   const { data: walletClient } = useWalletClient({chainId: 84532});
   const [submitted, setSubmitted] = useState(false);
+  const [userOpHash, setUserOpHash] = useState<string>()
 
   const createSession = async () => {
     const response = await connect(config, {connector: connectors[0], requests: [
@@ -51,20 +52,27 @@ function App() {
   const mint = async () => {
     if (account.address) {
       setSubmitted(true)
-      await sendCalls(walletClient as WalletClient, {
-        account: account.address,
-        chain: baseSepolia,
-        calls:[{
-          to: '0x416EDD85FA37A3bE56b9fE95B996359B539dA1A3',
-          value: 0n,
-          data: '0x7bc361a300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000044beebc5da0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000'
-        }],
-        capabilities: {
-          permissions: {
-            context: permissionsContext
+      try {
+        const userOpHash = await sendCalls(walletClient as WalletClient, {
+          account: account.address,
+          chain: baseSepolia,
+          calls:[{
+            to: '0x416EDD85FA37A3bE56b9fE95B996359B539dA1A3',
+            value: 0n,
+            data: '0x7bc361a300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000044beebc5da0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000'
+          }],
+          capabilities: {
+            permissions: {
+              context: permissionsContext
+            }
           }
+        })
+        if (userOpHash) {
+          setUserOpHash(userOpHash)
         }
-      })
+      } catch (e: any) {
+        console.error(e)
+      }
       setSubmitted(false)
     }
   };
@@ -97,6 +105,9 @@ function App() {
               Mint!
             </button>
           </>
+        )}
+        {userOpHash && (
+          <a href={`https://base-sepolia.blockscout.com/op/${userOpHash}`} target="_blank" className="mt-4 hover:underline">View transaction</a>
         )}
       </div>
     </div>
