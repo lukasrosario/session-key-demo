@@ -17,7 +17,7 @@ function App() {
 
   const createSession = async () => {
     const response = await connect(config, {connector: connectors[0], requests: [
-      { message: "Sign in" },
+      // { message: "Sign in" },
       {
         permissions: {
           expiry: 95778400000,
@@ -93,7 +93,7 @@ function App() {
         )}
       </div>
 
-      <div className="div flex flex-col items-center justify-center space-y-8">
+      <div className="div flex flex-col items-center justify-center space-y-8 relative">
         {!account.address && <h2 className="text-xl">Session key demo</h2>}
         {account.address && (
           <>
@@ -103,12 +103,12 @@ function App() {
               onClick={mint}
               disabled={submitted}
             >
-              Mint!
+              Buy
             </button>
           </>
         )}
         {userOpHash && (
-          <a href={`https://base-sepolia.blockscout.com/op/${userOpHash}`} target="_blank" className="mt-4 hover:underline">View transaction</a>
+          <a href={`https://base-sepolia.blockscout.com/op/${userOpHash}`} target="_blank" className="absolute top-8 hover:underline">View transaction</a>
         )}
       </div>
     </div>
