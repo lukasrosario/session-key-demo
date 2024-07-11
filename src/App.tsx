@@ -1,55 +1,90 @@
 import { useAccount, useConfig, useConnect, useWalletClient } from "wagmi";
-import { useState } from "react";
-import { WalletClient, WalletGrantPermissionsReturnType, parseUnits, } from "viem";
+import { useState, useEffect } from "react";
+import { WalletClient, WalletGrantPermissionsReturnType, parseUnits, toHex, encodeAbiParameters } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
-import { connect } from "wagmi/actions";
+// import { connect } from "wagmi/actions";
+import { GrantedPermission } from "./types";
+import { createCredential } from "webauthn-p256"
 
 function App() {
   const account = useAccount();
   const config = useConfig()
-  const { connectors } = useConnect();
+  const { connectors, connect } = useConnect();
   const [permissionsContext, setPermissionsContext] = useState('')
   const { data: walletClient } = useWalletClient({chainId: 84532});
   const [submitted, setSubmitted] = useState(false);
   const [userOpHash, setUserOpHash] = useState<string>()
+  const [lastCredentialId, setLastCredentialId] = useState<string>("")
 
-  const createSession = async () => {
-    const response = await connect(config, {connector: connectors[0], requests: [
-      // { message: "Sign in" },
-      {
-        permissions: {
+  const friendTechAddress = '0x416EDD85FA37A3bE56b9fE95B996359B539dA1A3'
+  const friendTechPermissionArgs = encodeAbiParameters(
+    [
+      { name: 'maxBuyAmount', type: 'uint256' },
+      { name: 'maxSellyAmount', type: 'uint256' },
+    ],
+    [parseUnits("100", 18), parseUnits("100", 18)]
+  )
+
+  console.log('connectors', connectors)
+  console.log('walletClient', walletClient)
+
+  console.log('permissionsContext', permissionsContext)
+
+  async function grantPermissions(): GrantedPermission[] {
+    const credential = await createCredential({name: "Demo App"})
+    setLastCredentialId(credential.id)
+    const encodedPublicKey = encodeAbiParameters(
+      [
+        { name: "x", type: "uint256" },
+        { name: "y", type: "uint256" },
+      ],
+      [credential.publicKey.x, credential.publicKey.y]
+    );
+    console.log("encodedPublicKey", encodedPublicKey);
+    const grantedPermissions = await walletClient?.request({method: "wallet_grantPermissions", params: {
+      permissions: [
+        {
+          account: account.address,
+          chainId: toHex(84532),
           expiry: 95778400000,
-          chainId: 84532,
           signer: {
-            type: "wallet",
-          },
-          permissions: [
-            {
-                required: true,
-                type: "session-call",
-                data: {},
-                policies: [
-                    {
-                        type: "native-token-spend-limit",
-                        data: {
-                            value: "0x100",
-                        },
-                    }
-                ]
+            type: "passkey",
+            data: {
+              publicKey: encodedPublicKey,
+              credentialId: credential.id
             }
-        ]
-        },
-      },
-    ] })
-    const context = (response.requestResponses.find(((request) => {
-      return request instanceof Object && 'permissionsContext' in request
-    })) as WalletGrantPermissionsReturnType).permissionsContext
-    setPermissionsContext(context)
+          },
+          permission: {
+            type: "call-with-permission",
+            data: {
+              allowedContract: friendTechAddress,
+              permissionArgs: friendTechPermissionArgs
+            },
+          },
+          policies: [
+              {
+                  type: "native-token-spend-limit",
+                  data: {
+                      allowance: toHex(parseUnits("1", 18)),
+                  },
+              }
+          ]
+        }, 
+      ]
+    }})
+    setPermissionsContext(grantedPermissions?.[0]?.context ?? "")
+  }
+
+  const login = async () => {
+    console.log('login')
+    await connect({ connector: connectors[0] })
+    // const response = await connect(config, { connector: connectors[0], requests: [] })
+    
   };
 
-  const mint = async () => {
+  const buy = async () => {
     if (account.address) {
       setSubmitted(true)
       setUserOpHash(undefined)
@@ -58,13 +93,14 @@ function App() {
           account: account.address,
           chain: baseSepolia,
           calls:[{
-            to: '0x416EDD85FA37A3bE56b9fE95B996359B539dA1A3',
+            to: friendTechAddress,
             value: 0n,
             data: '0x7bc361a300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000044beebc5da0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000'
           }],
           capabilities: {
             permissions: {
-              context: permissionsContext
+              context: permissionsContext,
+              credentialId: lastCredentialId
             }
           }
         })
@@ -85,7 +121,7 @@ function App() {
         {!account.address && (
           <button
             className="bg-white text-black p-2 rounded-lg w-36 text-lg"
-            onClick={createSession}
+            onClick={login}
             type="button"
           >
             Log in
@@ -94,19 +130,36 @@ function App() {
       </div>
 
       <div className="div flex flex-col items-center justify-center space-y-8 relative">
-        {!account.address && <h2 className="text-xl">Session key demo</h2>}
-        {account.address && (
+        {!account.address ? (
+          <h2 className="text-xl">Session key demo</h2>
+        ) : (
           <>
-            <button
-              className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
-              type="button"
-              onClick={mint}
-              disabled={submitted}
-            >
-              Buy
-            </button>
+          {permissionsContext == "" ? (
+            <>
+              <button
+                className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
+                type="button"
+                onClick={grantPermissions}
+                disabled={submitted}
+                >
+                Grant Permission
+              </button>
+                </>
+          ) : (
+            <>
+              <button
+                className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
+                type="button"
+                onClick={buy}
+                disabled={submitted}
+                >
+                Buy
+              </button>
+                </>
+          )}
           </>
         )}
+        {/* {!account.address && <h2 className="text-xl">Session key demo</h2>} */}
         {userOpHash && (
           <a href={`https://base-sepolia.blockscout.com/op/${userOpHash}`} target="_blank" className="absolute top-8 hover:underline">View transaction</a>
         )}

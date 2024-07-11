@@ -20,7 +20,8 @@
     "react-dom": "^18.2.0",
     "uuid": "^9.0.1",
     "viem": "latest",
-    "wagmi": "latest"
+    "wagmi": "^2.10.10",
+    "webauthn-p256": "^0.0.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.1.2",
@@ -39,8 +40,6 @@
     "vite": "^4.4.9"
   },
   "resolutions": {
-    "@wagmi/connectors": "npm:@lukasrosario/connectors@14.0.0",
-    "@wagmi/core": "npm:@lukasrosario/core@8.0.0",
-    "@coinbase/wallet-sdk": "file:./../coinbase-wallet-sdk/packages/wallet-sdk/lukasrosario-wallet-sdk-v65.14.0.tgz"
+    "@coinbase/wallet-sdk": "file:./../coinbase-wallet-sdk/packages/wallet-sdk/lukasrosario-wallet-sdk-v4.0.4-sessionkeys.7.tgz"
   }
 }
