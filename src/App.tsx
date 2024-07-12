@@ -1,11 +1,12 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
-import { WalletClient, parseUnits, toHex, encodeAbiParameters } from "viem";
+import { WalletClient, parseUnits, toHex, encodeAbiParameters, encodeFunctionData } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
 import { GrantedPermission } from "./types";
 import { createCredential } from "webauthn-p256"
+import { friendTechAbi } from "./abi/friendTech";
 
 function App() {
   const account = useAccount();
@@ -16,7 +17,7 @@ function App() {
   const [userOpHash, setUserOpHash] = useState<string>()
   const [lastCredentialId, setLastCredentialId] = useState<string>("")
 
-  const friendTechAddress = '0x416EDD85FA37A3bE56b9fE95B996359B539dA1A3'
+  const friendTechAddress = '0x1c09162287f31C6a05cfD9494c23Ef86cafbcDC4'
   const friendTechPermissionArgs = encodeAbiParameters(
     [
       { name: 'maxBuyAmount', type: 'uint256' },
@@ -24,6 +25,7 @@ function App() {
     ],
     [parseUnits("100", 18), parseUnits("100", 18)]
   )
+  const friendTechBuySharesCallData = encodeFunctionData({abi: friendTechAbi, functionName: "buyShares", args: [BigInt(1), BigInt(10)]})
 
   async function grantPermissions() {
     const credential = await createCredential({name: "Demo App"})
@@ -85,7 +87,7 @@ function App() {
           calls:[{
             to: friendTechAddress,
             value: 0n,
-            data: '0x7bc361a300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000044beebc5da0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000'
+            data: friendTechBuySharesCallData
           }],
           capabilities: {
             permissions: {
