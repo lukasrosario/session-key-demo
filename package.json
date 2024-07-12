@@ -40,6 +40,6 @@
     "vite": "^4.4.9"
   },
   "resolutions": {
-    "@coinbase/wallet-sdk": "file:./../coinbase-wallet-sdk/packages/wallet-sdk/lukasrosario-wallet-sdk-v4.0.4-sessionkeys.7.tgz"
+    "@coinbase/wallet-sdk": "file:./../coinbase-wallet-sdk/packages/wallet-sdk/lukasrosario-wallet-sdk-v4.0.4-sessionkeys.14.tgz"
   }
 }

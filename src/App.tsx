@@ -1,16 +1,14 @@
-import { useAccount, useConfig, useConnect, useWalletClient } from "wagmi";
-import { useState, useEffect } from "react";
-import { WalletClient, WalletGrantPermissionsReturnType, parseUnits, toHex, encodeAbiParameters } from "viem";
+import { useAccount, useConnect, useWalletClient } from "wagmi";
+import { useState } from "react";
+import { WalletClient, parseUnits, toHex, encodeAbiParameters } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
-// import { connect } from "wagmi/actions";
 import { GrantedPermission } from "./types";
 import { createCredential } from "webauthn-p256"
 
 function App() {
   const account = useAccount();
-  const config = useConfig()
   const { connectors, connect } = useConnect();
   const [permissionsContext, setPermissionsContext] = useState('')
   const { data: walletClient } = useWalletClient({chainId: 84532});
@@ -27,12 +25,7 @@ function App() {
     [parseUnits("100", 18), parseUnits("100", 18)]
   )
 
-  console.log('connectors', connectors)
-  console.log('walletClient', walletClient)
-
-  console.log('permissionsContext', permissionsContext)
-
-  async function grantPermissions(): GrantedPermission[] {
+  async function grantPermissions() {
     const credential = await createCredential({name: "Demo App"})
     setLastCredentialId(credential.id)
     const encodedPublicKey = encodeAbiParameters(
@@ -73,15 +66,12 @@ function App() {
           ]
         }, 
       ]
-    }})
+    }}) as GrantedPermission[]
     setPermissionsContext(grantedPermissions?.[0]?.context ?? "")
   }
 
   const login = async () => {
-    console.log('login')
     await connect({ connector: connectors[0] })
-    // const response = await connect(config, { connector: connectors[0], requests: [] })
-    
   };
 
   const buy = async () => {
