@@ -1,6 +1,6 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
-import { WalletClient, parseUnits, toHex, encodeAbiParameters, encodeFunctionData } from "viem";
+import { WalletClient, parseUnits, toHex, encodeAbiParameters, encodeFunctionData, decodeAbiParameters, Hex } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
@@ -81,7 +81,7 @@ function App() {
       setSubmitted(true)
       setUserOpHash(undefined)
       try {
-        const userOpHash = await sendCalls(walletClient as WalletClient, {
+        const callsId = await sendCalls(walletClient as WalletClient, {
           account: account.address,
           chain: baseSepolia,
           calls:[{
@@ -96,7 +96,11 @@ function App() {
             }
           }
         })
-        if (userOpHash) {
+        if (callsId) {
+          const [userOpHash,] = decodeAbiParameters([
+            { name: "userOpHash", type: "bytes32" },
+            { name: "chainId", type: "uint256" },
+          ], callsId as Hex)
           setUserOpHash(userOpHash)
         }
       } catch (e: any) {
