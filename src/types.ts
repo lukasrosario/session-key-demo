@@ -1,10 +1,12 @@
+import { Hex } from "viem";
+
 export type GrantPermission = {
     account: `0x${string}`;
     chainId: `0x${string}`; // hex-encoding of uint256
     expiry: number; // unix seconds
     signer: {
       type: string; // enum defined by ERC
-      data: any;
+      data?: any;
     };
     permission: {
       type: string; // enum defined by ERC
@@ -51,7 +53,7 @@ export type PasskeySigner = {
 
   export type GrantedPermission = GrantPermission & {
     // arbitrary context to identify a permission for revoking permissions or submitting userOps, can contain non-identifying data as well
-    context: string;
+    context: Hex;
     // 4337 account deployment
     accountMeta?: {
       factory: `0x${string}`;
