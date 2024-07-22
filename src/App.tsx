@@ -28,8 +28,6 @@ function App() {
   const [submitted, setSubmitted] = useState(false);
   const [userOpHash, setUserOpHash] = useState<string>();
 
-  console.log(account, account.isConnected, account.address)
-
   const friendTechAddress = "0x1c09162287f31C6a05cfD9494c23Ef86cafbcDC4";
   const friendTechPermissionArgs = encodeAbiParameters(
     [
@@ -60,7 +58,7 @@ function App() {
           {
             account: account.address,
             chainId: toHex(84532),
-            expiry: 95778400000,
+            expiry: 957784000000000,
             signer: {
               type: "wallet",
             },
