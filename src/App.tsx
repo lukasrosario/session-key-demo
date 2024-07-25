@@ -1,5 +1,5 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   WalletClient,
   parseUnits,
@@ -8,50 +8,39 @@ import {
   encodeFunctionData,
   decodeAbiParameters,
   Hex,
-  Address,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
 import { GrantedPermission } from "./types";
 import { friendTechAbi } from "./abi/friendTech";
-import {
-  getContextForAddress,
-  setContextForAddress,
-} from "./util/localStorage";
+import { useActivePermissions } from "wagmi/experimental";
+
+const friendTechAddress = "0x1c09162287f31C6a05cfD9494c23Ef86cafbcDC4";
+const friendTechPermissionArgs = encodeAbiParameters(
+  [
+    { name: "maxBuyAmount", type: "uint256" },
+    { name: "maxSellyAmount", type: "uint256" },
+  ],
+  [parseUnits("100", 18), parseUnits("100", 18)],
+);
+const friendTechBuySharesCallData = encodeFunctionData({
+  abi: friendTechAbi,
+  functionName: "buyShares",
+  args: [BigInt(1), BigInt(10)],
+});
 
 function App() {
   const account = useAccount();
   const { connectors, connect } = useConnect();
-  const [permissionsContext, setPermissionsContext] = useState("");
   const { data: walletClient } = useWalletClient({ chainId: 84532 });
   const [submitted, setSubmitted] = useState(false);
   const [userOpHash, setUserOpHash] = useState<string>();
-
-  const friendTechAddress = "0x1c09162287f31C6a05cfD9494c23Ef86cafbcDC4";
-  const friendTechPermissionArgs = encodeAbiParameters(
-    [
-      { name: "maxBuyAmount", type: "uint256" },
-      { name: "maxSellyAmount", type: "uint256" },
-    ],
-    [parseUnits("100", 18), parseUnits("100", 18)],
-  );
-  const friendTechBuySharesCallData = encodeFunctionData({
-    abi: friendTechAbi,
-    functionName: "buyShares",
-    args: [BigInt(1), BigInt(10)],
-  });
-
-  useEffect(() => {
-    if (account.address) {
-      const contextForAddress = getContextForAddress(account.address);
-      setPermissionsContext(contextForAddress ?? "");
-    }
-  }, [account.address]);
+  const { data: permissions } = useActivePermissions(account);
 
   async function grantPermissions() {
     if (account.address) {
-      const grantedPermissions = (await walletClient?.request({
+      (await walletClient?.request({
         method: "wallet_grantPermissions",
         params: {
           // @ts-ignore
@@ -82,20 +71,15 @@ function App() {
           ],
         },
       })) as GrantedPermission[];
-      setPermissionsContext(grantedPermissions?.[0]?.context);
-      setContextForAddress(
-        account.address as Address,
-        grantedPermissions?.[0]?.context,
-      );
     }
   }
 
   const login = async () => {
-    await connect({ connector: connectors[0] });
+    connect({ connector: connectors[0] });
   };
 
   const buy = async () => {
-    if (account.address) {
+    if (account.address && permissions?.context) {
       setSubmitted(true);
       setUserOpHash(undefined);
       try {
@@ -109,6 +93,11 @@ function App() {
               data: friendTechBuySharesCallData,
             },
           ],
+          capabilities: {
+            permissions: {
+              context: permissions.context,
+            },
+          },
         });
         if (callsId) {
           const [userOpHash] = decodeAbiParameters(
@@ -149,7 +138,7 @@ function App() {
           <h2 className="text-xl">Permissions demo</h2>
         ) : (
           <>
-            {permissionsContext == "" ? (
+            {!permissions?.context ? (
               <>
                 <button
                   className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
