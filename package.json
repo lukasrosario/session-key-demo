@@ -40,6 +40,6 @@
     "vite": "^4.4.9"
   },
   "resolutions": {
-    "@coinbase/wallet-sdk": "npm:@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.1"
+    "@coinbase/wallet-sdk": "npm:@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.6"
   }
 }

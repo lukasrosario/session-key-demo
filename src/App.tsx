@@ -58,7 +58,7 @@ function App() {
           {
             account: account.address,
             chainId: toHex(84532),
-            expiry: 957784000000000,
+            expiry: 17218875770,
             signer: {
               type: "wallet",
             },

@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@coinbase/wallet-sdk': npm:@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.1
+  '@coinbase/wallet-sdk': npm:@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.6
 
 dependencies:
   '@noble/curves':
@@ -2285,8 +2285,8 @@ packages:
       '@lit-labs/ssr-dom-shim': 1.2.0
     dev: false
 
-  /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.1(typescript@5.5.3):
-    resolution: {integrity: sha512-UHY0dSuzDEIGf1W3WTv6bhyu84PMkvy9OCjuZuLIDvNqDgH6nM+aKoj4fC2Opsh/hOpKIKNvrIiBXTUF7K9iiA==}
+  /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.6(typescript@5.5.3):
+    resolution: {integrity: sha512-wE5QyT+eL0T9tXXwDa+k5M6x4BxKEP+2U/RUzLaxNy3t7YnMeK0k1VKGbULU7Jwlmp+kLSfficyd/e21Fq673w==}
     dependencies:
       '@simplewebauthn/browser': 10.0.0
       '@simplewebauthn/server': 10.0.0
@@ -2297,7 +2297,7 @@ packages:
       keccak: 3.0.4
       preact: 10.22.1
       sha.js: 2.4.11
-      viem: 2.17.3(typescript@5.5.3)(zod@3.23.8)
+      viem: 2.18.0(typescript@5.5.3)
       webauthn-p256: 0.0.2
     transitivePeerDependencies:
       - bufferutil
@@ -3652,7 +3652,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@coinbase/wallet-sdk': /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.1(typescript@5.5.3)
+      '@coinbase/wallet-sdk': /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.6(typescript@5.5.3)
       '@metamask/sdk': 0.26.4(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
       '@safe-global/safe-apps-provider': 0.18.1(typescript@5.5.3)
       '@safe-global/safe-apps-sdk': 8.1.0(typescript@5.5.3)
@@ -8421,6 +8421,30 @@ packages:
       - utf-8-validate
       - zod
 
+  /viem@2.18.0(typescript@5.5.3):
+    resolution: {integrity: sha512-HA4Dj+PCNWvvZDThWcUPg0sjiS8uwGRaxs3CMBOASL/j0p2pD4nR9vY/y/pAiRr491hGCnrSCVCmb/qqA57wIw==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@adraffy/ens-normalize': 1.10.0
+      '@noble/curves': 1.4.0
+      '@noble/hashes': 1.4.0
+      '@scure/bip32': 1.4.0
+      '@scure/bip39': 1.3.0
+      abitype: 1.0.5(typescript@5.5.3)(zod@3.23.8)
+      isows: 1.0.4(ws@8.17.1)
+      typescript: 5.5.3
+      webauthn-p256: 0.0.5
+      ws: 8.17.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+    dev: false
+
   /vite@4.5.3:
     resolution: {integrity: sha512-kQL23kMeX92v3ph7IauVkXkikdDRsYMGTVl5KY2E9OY4ONLvkHf04MDTbnfo6NKxZiDLWzVpP5oTa8hQD8U3dg==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -8519,6 +8543,13 @@ packages:
 
   /webauthn-p256@0.0.2:
     resolution: {integrity: sha512-IK526z2vBudb3oMT4vRYwelikKro3TxLqlPz4gyb1mXAp8XkHsUAjrTJlQA37HejsC1rWhCfYXWHPEkMJxZ4Xw==}
+    dependencies:
+      '@noble/curves': 1.4.2
+      '@noble/hashes': 1.4.0
+    dev: false
+
+  /webauthn-p256@0.0.5:
+    resolution: {integrity: sha512-drMGNWKdaixZNobeORVIqq7k5DsRC9FnG201K2QjeOoQLmtSDaSsVZdkg6n5jUALJKcAG++zBPJXmv6hy0nWFg==}
     dependencies:
       '@noble/curves': 1.4.2
       '@noble/hashes': 1.4.0
