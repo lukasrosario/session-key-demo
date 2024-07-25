@@ -34,7 +34,7 @@ function App() {
       { name: "maxBuyAmount", type: "uint256" },
       { name: "maxSellyAmount", type: "uint256" },
     ],
-    [parseUnits("100", 18), parseUnits("100", 18)]
+    [parseUnits("100", 18), parseUnits("100", 18)],
   );
   const friendTechBuySharesCallData = encodeFunctionData({
     abi: friendTechAbi,
@@ -50,42 +50,44 @@ function App() {
   }, [account.address]);
 
   async function grantPermissions() {
-    const grantedPermissions = (await walletClient?.request({
-      method: "wallet_grantPermissions",
-      params: {
-        // @ts-ignore
-        permissions: [
-          {
-            account: account.address,
-            chainId: toHex(84532),
-            expiry: 17218875770,
-            signer: {
-              type: "wallet",
-            },
-            permission: {
-              type: "call-with-permission",
-              data: {
-                allowedContract: friendTechAddress,
-                permissionArgs: friendTechPermissionArgs,
+    if (account.address) {
+      const grantedPermissions = (await walletClient?.request({
+        method: "wallet_grantPermissions",
+        params: {
+          // @ts-ignore
+          permissions: [
+            {
+              account: account.address,
+              chainId: toHex(84532),
+              expiry: 17218875770,
+              signer: {
+                type: "wallet",
               },
-            },
-            policies: [
-              {
-                type: "native-token-spend-limit",
+              permission: {
+                type: "call-with-permission",
                 data: {
-                  allowance: toHex(parseUnits("1", 18)),
+                  allowedContract: friendTechAddress,
+                  permissionArgs: friendTechPermissionArgs,
                 },
               },
-            ],
-          },
-        ],
-      },
-    })) as GrantedPermission[];
-    setPermissionsContext(grantedPermissions?.[0]?.context);
-    setContextForAddress(
-      account.address as Address,
-      grantedPermissions?.[0]?.context
-    );
+              policies: [
+                {
+                  type: "native-token-spend-limit",
+                  data: {
+                    allowance: toHex(parseUnits("1", 18)),
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })) as GrantedPermission[];
+      setPermissionsContext(grantedPermissions?.[0]?.context);
+      setContextForAddress(
+        account.address as Address,
+        grantedPermissions?.[0]?.context,
+      );
+    }
   }
 
   const login = async () => {
@@ -114,7 +116,7 @@ function App() {
               { name: "userOpHash", type: "bytes32" },
               { name: "chainId", type: "uint256" },
             ],
-            callsId as Hex
+            callsId as Hex,
           );
           setUserOpHash(userOpHash);
         }
