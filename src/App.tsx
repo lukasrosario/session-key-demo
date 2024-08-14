@@ -2,12 +2,11 @@ import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
 import {
   WalletClient,
-  parseUnits,
   toHex,
-  encodeAbiParameters,
   encodeFunctionData,
   decodeAbiParameters,
   Hex,
+  parseEther,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
@@ -17,13 +16,6 @@ import { friendTechAbi } from "./abi/friendTech";
 import { useActivePermissions } from "wagmi/experimental";
 
 const friendTechAddress = "0x1c09162287f31C6a05cfD9494c23Ef86cafbcDC4";
-const friendTechPermissionArgs = encodeAbiParameters(
-  [
-    { name: "maxBuyAmount", type: "uint256" },
-    { name: "maxSellyAmount", type: "uint256" },
-  ],
-  [parseUnits("100", 18), parseUnits("100", 18)],
-);
 const friendTechBuySharesCallData = encodeFunctionData({
   abi: friendTechAbi,
   functionName: "buyShares",
@@ -53,20 +45,14 @@ function App() {
                 type: "wallet",
               },
               permission: {
-                type: "call-with-permission",
+                type: "native-token-rolling-spend-limit",
                 data: {
-                  allowedContract: friendTechAddress,
-                  permissionArgs: friendTechPermissionArgs,
+                  spendLimit: toHex(parseEther("3")), // hex for uint256
+                  rollingPeriod: 60 * 60, // unix seconds
+                  allowedContract: friendTechAddress, // only allowed to spend on this contract
                 },
               },
-              policies: [
-                {
-                  type: "native-token-spend-limit",
-                  data: {
-                    allowance: toHex(parseUnits("1", 18)),
-                  },
-                },
-              ],
+              policies: [],
             },
           ],
         },
@@ -79,7 +65,8 @@ function App() {
   };
 
   const buy = async () => {
-    if (account.address && permissions?.context) {
+    // @ts-expect-error
+    if (account.address && permissions?.[0]?.context) {
       setSubmitted(true);
       setUserOpHash(undefined);
       try {
@@ -138,29 +125,32 @@ function App() {
           <h2 className="text-xl">Permissions demo</h2>
         ) : (
           <>
-            {!permissions?.context ? (
-              <>
-                <button
-                  className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
-                  type="button"
-                  onClick={grantPermissions}
-                  disabled={submitted}
-                >
-                  Grant Permission
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
-                  type="button"
-                  onClick={buy}
-                  disabled={submitted}
-                >
-                  Buy
-                </button>
-              </>
-            )}
+            {
+              // @ts-expect-error
+              !permissions?.[0]?.context ? (
+                <>
+                  <button
+                    className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
+                    type="button"
+                    onClick={grantPermissions}
+                    disabled={submitted}
+                  >
+                    Grant Permission
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
+                    type="button"
+                    onClick={buy}
+                    disabled={submitted}
+                  >
+                    Buy
+                  </button>
+                </>
+              )
+            }
           </>
         )}
         {/* {!account.address && <h2 className="text-xl">Session key demo</h2>} */}
