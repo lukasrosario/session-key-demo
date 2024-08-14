@@ -36,8 +36,8 @@ dependencies:
     specifier: npm:@lukasrosario/viem@2.17.4-permissionedkeysalpha.6
     version: /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3)
   wagmi:
-    specifier: npm:@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.12
-    version: /@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.12(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
+    specifier: npm:@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.14
+    version: /@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.14(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
   webauthn-p256:
     specifier: ^0.0.2
     version: 0.0.2
@@ -2305,8 +2305,8 @@ packages:
       - zod
     dev: false
 
-  /@lukasrosario/wagmi-connectors@5.0.25-permissionedkeysalpha.2(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
-    resolution: {integrity: sha512-vy4N83sTAwF5cyb9n62zqcPzNxZI1pbdHtJAe3ukWxn2pzJGQzuCVtrPx8Ifzvvd3XVXDH7HkwYtlOS7EDbJuw==}
+  /@lukasrosario/wagmi-connectors@5.0.25-permissionedkeysalpha.4(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
+    resolution: {integrity: sha512-Z+I3NhkjU+Z3vTf1FNfo7FtDmeWfCumBo4q+SvIBbATWbn1jIS4FFuXKKylIFAbQhDuFfATVxVOm++ohopMB7g==}
     peerDependencies:
       '@wagmi/core': workspace:*
       typescript: '>=5.0.4'
@@ -2315,7 +2315,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@coinbase/wallet-sdk': /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.7(typescript@5.5.3)
+      '@coinbase/wallet-sdk': /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.9(typescript@5.5.3)
       '@metamask/sdk': 0.26.4(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
       '@safe-global/safe-apps-provider': 0.18.3(typescript@5.5.3)
       '@safe-global/safe-apps-sdk': 9.1.0(typescript@5.5.3)
@@ -2375,8 +2375,8 @@ packages:
       - react
     dev: false
 
-  /@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.12(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
-    resolution: {integrity: sha512-zMnfk4/O6PiMY9tBCEjEnyiqwB0e4ytI4yiRAu20BE5PskC/i6eu1KsQGgcT9Y2plJLvXii0WUm4UOzXYEFw8w==}
+  /@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.14(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
+    resolution: {integrity: sha512-3F3yd+rM8efnuXv6oNg6rlM96ay1EhQfDZbdHtvcI30ur7vAwWwKjY9n3+3BTczz+ezT/9XG4thPWGSrayTuWw==}
     peerDependencies:
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
@@ -2386,7 +2386,7 @@ packages:
         optional: true
     dependencies:
       '@tanstack/react-query': 5.0.5(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
-      '@wagmi/connectors': /@lukasrosario/wagmi-connectors@5.0.25-permissionedkeysalpha.2(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
+      '@wagmi/connectors': /@lukasrosario/wagmi-connectors@5.0.25-permissionedkeysalpha.4(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
       '@wagmi/core': /@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)
       react: 18.3.1
       typescript: 5.5.3
@@ -2420,8 +2420,8 @@ packages:
       - zod
     dev: false
 
-  /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.7(typescript@5.5.3):
-    resolution: {integrity: sha512-bfOyI7h7ovpchZIwBNBKWm0Ve178IbdHeXA2ww0q7fNjix4BUCx1cNgJkKYqNbcKRcwSa5SUiCC0GVHj4zvFBw==}
+  /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.9(typescript@5.5.3):
+    resolution: {integrity: sha512-o+sE4EJ6TezNOSKw7Ikuc4LHiLiFAATaG3cPQRKpMS77GxzYIK+VseNIzCE+FFGepUe3PP6xOPE6JZZffCXwig==}
     dependencies:
       '@simplewebauthn/browser': 10.0.0
       '@simplewebauthn/server': 10.0.0
