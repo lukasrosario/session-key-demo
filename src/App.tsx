@@ -42,7 +42,7 @@ function App() {
               chainId: toHex(84532),
               expiry: 17218875770,
               signer: {
-                type: "wallet",
+                type: "provider",
               },
               permission: {
                 type: "native-token-rolling-spend-limit",
