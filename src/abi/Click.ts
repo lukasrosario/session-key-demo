@@ -11,7 +11,7 @@ export const clickAbi = [
     name: "click",
     inputs: [],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",

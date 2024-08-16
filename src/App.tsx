@@ -7,6 +7,7 @@ import {
   decodeAbiParameters,
   Hex,
   parseEther,
+  parseUnits,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
@@ -15,7 +16,7 @@ import { GrantedPermission } from "./types";
 import { useActivePermissions } from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
 
-const clickAddress = "0xF541Fdec5275893c325d9Fb004be61Da587b51EC";
+const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
   abi: clickAbi,
   functionName: "click",
@@ -47,7 +48,7 @@ function App() {
               permission: {
                 type: "native-token-rolling-spend-limit",
                 data: {
-                  spendLimit: toHex(parseEther("3")), // hex for uint256
+                  spendLimit: toHex(parseEther("0.1")), // hex for uint256
                   rollingPeriod: 60 * 60, // unix seconds
                   allowedContract: clickAddress, // only allowed to spend on this contract
                 },
@@ -76,7 +77,7 @@ function App() {
           calls: [
             {
               to: clickAddress,
-              value: 0n,
+              value: parseUnits("0", 18),
               data: clickData,
             },
           ],
