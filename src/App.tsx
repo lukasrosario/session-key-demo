@@ -7,19 +7,20 @@ import {
   decodeAbiParameters,
   Hex,
   parseEther,
+  parseUnits,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
 import { GrantedPermission } from "./types";
-import { friendTechAbi } from "./abi/friendTech";
 import { useActivePermissions } from "wagmi/experimental";
+import { clickAbi } from "./abi/Click";
 
-const friendTechAddress = "0x1c09162287f31C6a05cfD9494c23Ef86cafbcDC4";
-const friendTechBuySharesCallData = encodeFunctionData({
-  abi: friendTechAbi,
-  functionName: "buyShares",
-  args: [BigInt(1), BigInt(10)],
+const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
+const clickData = encodeFunctionData({
+  abi: clickAbi,
+  functionName: "click",
+  args: [],
 });
 
 function App() {
@@ -47,9 +48,9 @@ function App() {
               permission: {
                 type: "native-token-rolling-spend-limit",
                 data: {
-                  spendLimit: toHex(parseEther("3")), // hex for uint256
+                  spendLimit: toHex(parseEther("0.1")), // hex for uint256
                   rollingPeriod: 60 * 60, // unix seconds
-                  allowedContract: friendTechAddress, // only allowed to spend on this contract
+                  allowedContract: clickAddress, // only allowed to spend on this contract
                 },
               },
               policies: [],
@@ -75,9 +76,9 @@ function App() {
           chain: baseSepolia,
           calls: [
             {
-              to: friendTechAddress,
-              value: 0n,
-              data: friendTechBuySharesCallData,
+              to: clickAddress,
+              value: parseUnits("0", 18),
+              data: clickData,
             },
           ],
           capabilities: {
