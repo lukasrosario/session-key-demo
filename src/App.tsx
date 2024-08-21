@@ -8,12 +8,12 @@ import {
   Hex,
   parseEther,
   parseUnits,
+  toFunctionSelector,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
-import { GrantedPermission } from "./types";
-import { useActivePermissions } from "wagmi/experimental";
+import { useActivePermissions, useGrantPermissions } from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
@@ -30,34 +30,49 @@ function App() {
   const [submitted, setSubmitted] = useState(false);
   const [userOpHash, setUserOpHash] = useState<string>();
   const { data: permissions } = useActivePermissions(account);
+  const { grantPermissionsAsync } = useGrantPermissions();
 
   async function grantPermissions() {
     if (account.address) {
-      (await walletClient?.request({
-        method: "wallet_grantPermissions",
-        params: {
-          // @ts-ignore
-          permissions: [
-            {
-              account: account.address,
-              chainId: toHex(84532),
-              expiry: 17218875770,
-              signer: {
-                type: "provider",
+      await grantPermissionsAsync({
+        permissions: [
+          {
+            account: account.address,
+            chainId: 84532,
+            expiry: 17218875770,
+            signer: {
+              type: "p256",
+              data: {
+                publicKey: "0x...",
               },
-              permission: {
-                type: "native-token-rolling-spend-limit",
+            },
+            permissions: [
+              {
+                type: "native-token-recurring-allowance",
                 data: {
-                  spendLimit: toHex(parseEther("0.1")), // hex for uint256
-                  rollingPeriod: 60 * 60, // unix seconds
-                  allowedContract: clickAddress, // only allowed to spend on this contract
+                  allowance: parseEther("3"),
+                  cycleStart: Math.floor(Date.now() / 1000),
+                  cycleDuration: 86400,
                 },
               },
-              policies: [],
-            },
-          ],
-        },
-      })) as GrantedPermission[];
+              {
+                type: "allowed-contract",
+                data: {
+                  contract: clickAddress,
+                },
+              },
+              {
+                type: "allowed-selector",
+                data: {
+                  selector: toFunctionSelector(
+                    "permissionedCall(bytes calldata call)",
+                  ),
+                },
+              },
+            ],
+          },
+        ],
+      });
     }
   }
 
