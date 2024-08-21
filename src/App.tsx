@@ -31,25 +31,29 @@ function App() {
   const [userOpHash, setUserOpHash] = useState<string>();
   const { data: permissions, refetch } = useActivePermissions(account);
 
+  console.log('account', account)
+
   async function grantPermissions() {
     if (account.address) {
+      const now = Math.floor(Date.now() / 1000);
       (await walletClient?.request({
         method: "wallet_grantPermissions",
         params: {
           // @ts-ignore
           permissions: [
             {
-              account: account.address,
+              address: account.address,
               chainId: toHex(84532),
-              expiry: 17218875770,
+              expiry: now + 3600 * 24,
               signer: {
                 type: "provider",
               },
               permission: {
-                type: "native-token-rolling-spend-limit",
+                type: "native-token-recurring-allowance",
                 data: {
-                  spendLimit: toHex(parseEther("0.1")), // hex for uint256
-                  rollingPeriod: 60 * 60, // unix seconds
+                  allowance: toHex(parseEther("0.1")), // hex for uint256
+                  start: now, // unix seconds
+                  period: 3600 * 24, // 1 day in seconds
                   allowedContract: clickAddress, // only allowed to spend on this contract
                 },
               },
