@@ -2,7 +2,6 @@ import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
 import {
   WalletClient,
-  toHex,
   encodeFunctionData,
   decodeAbiParameters,
   Hex,
@@ -56,14 +55,9 @@ function App() {
                 },
               },
               {
-                type: "allowed-contract",
+                type: "allowed-permission-selector",
                 data: {
                   contract: clickAddress,
-                },
-              },
-              {
-                type: "allowed-selector",
-                data: {
                   selector: toFunctionSelector(
                     "permissionedCall(bytes calldata call)",
                   ),
