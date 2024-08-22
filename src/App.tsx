@@ -29,7 +29,7 @@ function App() {
   const { data: walletClient } = useWalletClient({ chainId: 84532 });
   const [submitted, setSubmitted] = useState(false);
   const [userOpHash, setUserOpHash] = useState<string>();
-  const { data: permissions } = useActivePermissions(account);
+  const { data: permissions, refetch } = useActivePermissions(account);
 
   async function grantPermissions() {
     if (account.address) {
@@ -58,12 +58,15 @@ function App() {
           ],
         },
       })) as GrantedPermission[];
+      refetch();
     }
   }
 
   const login = async () => {
     connect({ connector: connectors[0] });
   };
+
+  console.log("lukas", permissions);
 
   const buy = async () => {
     // @ts-expect-error
