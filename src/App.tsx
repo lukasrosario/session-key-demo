@@ -8,13 +8,16 @@ import {
   Hex,
   parseEther,
   parseUnits,
+  toFunctionSelector,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import { sendCalls } from "viem/experimental";
 import { baseSepolia } from "viem/chains";
 import { GrantedPermission } from "./types";
-import { useActivePermissions } from "wagmi/experimental";
+import { useActivePermissions, useGrantPermissions } from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
+import { createCredential } from "webauthn-p256";
+import { P256Credential } from "webauthn-p256";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -29,40 +32,51 @@ function App() {
   const { data: walletClient } = useWalletClient({ chainId: 84532 });
   const [submitted, setSubmitted] = useState(false);
   const [userOpHash, setUserOpHash] = useState<string>();
-  const { data: permissions, refetch } = useActivePermissions(account);
-
-  console.log('account', account)
+  const [permissions, setPermissions] = useState();
+  const { grantPermissionsAsync } = useGrantPermissions();
+  const [credential, setCredential] = useState<
+    undefined | P256Credential<"cryptokey">
+  >();
 
   async function grantPermissions() {
     if (account.address) {
-      const now = Math.floor(Date.now() / 1000);
-      (await walletClient?.request({
-        method: "wallet_grantPermissions",
-        params: {
-          // @ts-ignore
-          permissions: [
-            {
-              address: account.address,
-              chainId: toHex(84532),
-              expiry: now + 3600 * 24,
-              signer: {
-                type: "provider",
+      const newCredential = await createCredential({ type: "cryptoKey" });
+      const response = await grantPermissionsAsync({
+        permissions: [
+          {
+            account: account.address,
+            chainId: 84532,
+            expiry: 17218875770,
+            signer: {
+              type: "p256",
+              data: {
+                publicKey: newCredential.publicKey,
               },
-              permission: {
+            },
+            permissions: [
+              {
                 type: "native-token-recurring-allowance",
                 data: {
-                  allowance: toHex(parseEther("0.1")), // hex for uint256
-                  start: now, // unix seconds
-                  period: 3600 * 24, // 1 day in seconds
-                  allowedContract: clickAddress, // only allowed to spend on this contract
+                  allowance: parseEther("3"),
+                  start: Math.floor(Date.now() / 1000),
+                  period: 86400,
                 },
               },
-              policies: [],
-            },
-          ],
-        },
-      })) as GrantedPermission[];
-      refetch();
+              {
+                type: "allowed-contract-selector",
+                data: {
+                  contract: clickAddress,
+                  selector: toFunctionSelector(
+                    "permissionedCall(bytes calldata call)",
+                  ),
+                },
+              },
+            ],
+          },
+        ],
+      });
+      setCredential(newCredential);
+      setPermissions(response);
     }
   }
 
@@ -74,26 +88,63 @@ function App() {
 
   const buy = async () => {
     // @ts-expect-error
-    if (account.address && permissions?.[0]?.context) {
-      setSubmitted(true);
+    console.log(permissions?.[0]?.context, credential, account.address);
+    if (account.address && permissions?.[0]?.context && credential) {
       setUserOpHash(undefined);
       try {
-        const callsId = await sendCalls(walletClient as WalletClient, {
-          account: account.address,
-          chain: baseSepolia,
-          calls: [
+        const preparedCalls = await walletClient?.request({
+          method: "wallet_prepareCalls",
+          params: [
             {
-              to: clickAddress,
-              value: parseUnits("0", 18),
-              data: clickData,
+              from: account.address,
+              calls: [
+                {
+                  to: clickAddress,
+                  value: toHex(parseUnits("0", 18)),
+                  data: clickData,
+                  chainId: toHex(baseSepolia.id),
+                },
+              ],
+              capabilities: {
+                permissions: {
+                  context: (permissions?.[0] as { context: string }).context,
+                },
+              },
             },
           ],
-          capabilities: {
-            permissions: {
-              context: permissions.context,
-            },
-          },
         });
+        console.log("lukas", preparedCalls);
+        const signature = await credential.sign(preparedCalls[0].hash);
+        const { callsId } = await walletClient?.request({
+          method: "wallet_sendCalls",
+          params: [
+            {
+              from: account.address,
+              capabilities: {
+                permissions: {
+                  context: (permissions?.[0] as { context: string }).context,
+                  preparedCalls: [{ ...preparedCalls[0], signature }],
+                },
+              },
+            },
+          ],
+        });
+        // const callsId = await sendCalls(walletClient as WalletClient, {
+        //   account: account.address,
+        //   chain: baseSepolia,
+        //   calls: [
+        //     {
+        //       to: clickAddress,
+        //       value: parseUnits("0", 18),
+        //       data: clickData,
+        //     },
+        //   ],
+        //   capabilities: {
+        //     permissions: {
+        //       context: permissions.context,
+        //     },
+        //   },
+        // });
         if (callsId) {
           const [userOpHash] = decodeAbiParameters(
             [
