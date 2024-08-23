@@ -85,8 +85,6 @@ function App() {
     connect({ connector: connectors[0] });
   };
 
-  console.log("lukas", permissions);
-
   const buy = async () => {
     if (account.address && permissionsContext && credential && walletClient) {
       setSubmitted(true);
@@ -108,7 +106,6 @@ function App() {
             },
           },
         });
-        console.log("lukas", preparedCalls);
         const signature = await credential.sign(preparedCalls[0].hash);
         const callsId = await sendCalls(walletClient as WalletClient, {
           account: account.address,
