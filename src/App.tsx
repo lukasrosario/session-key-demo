@@ -1,20 +1,21 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
 import {
-  WalletClient,
-  toHex,
   encodeFunctionData,
-  decodeAbiParameters,
   Hex,
   parseEther,
   parseUnits,
+  toFunctionSelector,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
-import { sendCalls } from "viem/experimental";
-import { baseSepolia } from "viem/chains";
-import { GrantedPermission } from "./types";
-import { useActivePermissions } from "wagmi/experimental";
+import {
+  useCallsStatus,
+  useGrantPermissions,
+  useSendCalls,
+} from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
+import { createCredential } from "webauthn-p256";
+import { P256Credential } from "webauthn-p256";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -28,37 +29,64 @@ function App() {
   const { connectors, connect } = useConnect();
   const { data: walletClient } = useWalletClient({ chainId: 84532 });
   const [submitted, setSubmitted] = useState(false);
-  const [userOpHash, setUserOpHash] = useState<string>();
-  const { data: permissions, refetch } = useActivePermissions(account);
+  const [callsId, setCallsId] = useState<string>();
+  const { data: callsStatus } = useCallsStatus({
+    id: callsId as string,
+    query: {
+      enabled: !!callsId,
+      refetchInterval: (data) =>
+        data.state.data?.status === "PENDING" ? 200 : false,
+    },
+  });
+  const [permissionsContext, setPermissionsContext] = useState<
+    Hex | undefined
+  >();
+  const { grantPermissionsAsync } = useGrantPermissions();
+  const [credential, setCredential] = useState<
+    undefined | P256Credential<"cryptokey">
+  >();
+  const { sendCallsAsync } = useSendCalls();
 
   async function grantPermissions() {
     if (account.address) {
-      (await walletClient?.request({
-        method: "wallet_grantPermissions",
-        params: {
-          // @ts-ignore
-          permissions: [
-            {
-              account: account.address,
-              chainId: toHex(84532),
-              expiry: 17218875770,
-              signer: {
-                type: "provider",
+      const newCredential = await createCredential({ type: "cryptoKey" });
+      const response = await grantPermissionsAsync({
+        permissions: [
+          {
+            address: account.address,
+            chainId: 84532,
+            expiry: 17218875770,
+            signer: {
+              type: "p256",
+              data: {
+                publicKey: newCredential.publicKey,
               },
-              permission: {
-                type: "native-token-rolling-spend-limit",
+            },
+            permissions: [
+              {
+                type: "native-token-recurring-allowance",
                 data: {
-                  spendLimit: toHex(parseEther("0.1")), // hex for uint256
-                  rollingPeriod: 60 * 60, // unix seconds
-                  allowedContract: clickAddress, // only allowed to spend on this contract
+                  allowance: parseEther("3"),
+                  start: Math.floor(Date.now() / 1000),
+                  period: 86400,
                 },
               },
-              policies: [],
-            },
-          ],
-        },
-      })) as GrantedPermission[];
-      refetch();
+              {
+                type: "allowed-contract-selector",
+                data: {
+                  contract: clickAddress,
+                  selector: toFunctionSelector(
+                    "permissionedCall(bytes calldata call)",
+                  ),
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const context = response[0].context as Hex;
+      setPermissionsContext(context);
+      setCredential(newCredential);
     }
   }
 
@@ -66,17 +94,12 @@ function App() {
     connect({ connector: connectors[0] });
   };
 
-  console.log("lukas", permissions);
-
   const buy = async () => {
-    // @ts-expect-error
-    if (account.address && permissions?.[0]?.context) {
+    if (account.address && permissionsContext && credential && walletClient) {
       setSubmitted(true);
-      setUserOpHash(undefined);
+      setCallsId(undefined);
       try {
-        const callsId = await sendCalls(walletClient as WalletClient, {
-          account: account.address,
-          chain: baseSepolia,
+        const callsId = await sendCallsAsync({
           calls: [
             {
               to: clickAddress,
@@ -86,20 +109,19 @@ function App() {
           ],
           capabilities: {
             permissions: {
-              context: permissions.context,
+              context: permissionsContext,
+            },
+          },
+          prepareAndSign: true,
+          sign: credential.sign,
+          signatureData: {
+            type: "permissions",
+            values: {
+              context: permissionsContext,
             },
           },
         });
-        if (callsId) {
-          const [userOpHash] = decodeAbiParameters(
-            [
-              { name: "userOpHash", type: "bytes32" },
-              { name: "chainId", type: "uint256" },
-            ],
-            callsId as Hex,
-          );
-          setUserOpHash(userOpHash);
-        }
+        setCallsId(callsId);
       } catch (e: any) {
         console.error(e);
       }
@@ -129,38 +151,35 @@ function App() {
           <h2 className="text-xl">Permissions demo</h2>
         ) : (
           <>
-            {
-              // @ts-expect-error
-              !permissions?.[0]?.context ? (
-                <>
-                  <button
-                    className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
-                    type="button"
-                    onClick={grantPermissions}
-                    disabled={submitted}
-                  >
-                    Grant Permission
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
-                    type="button"
-                    onClick={buy}
-                    disabled={submitted}
-                  >
-                    Buy
-                  </button>
-                </>
-              )
-            }
+            {!permissionsContext ? (
+              <>
+                <button
+                  className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
+                  type="button"
+                  onClick={grantPermissions}
+                  disabled={submitted}
+                >
+                  Grant Permission
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
+                  type="button"
+                  onClick={buy}
+                  disabled={submitted}
+                >
+                  Buy
+                </button>
+              </>
+            )}
           </>
         )}
         {/* {!account.address && <h2 className="text-xl">Session key demo</h2>} */}
-        {userOpHash && (
+        {callsStatus && callsStatus.status === "CONFIRMED" && (
           <a
-            href={`https://base-sepolia.blockscout.com/op/${userOpHash}`}
+            href={`https://base-sepolia.blockscout.com/tx/${callsStatus.receipts?.[0].transactionHash}`}
             target="_blank"
             className="absolute top-8 hover:underline"
           >

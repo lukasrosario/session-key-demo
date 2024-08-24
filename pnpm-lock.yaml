@@ -22,7 +22,7 @@ dependencies:
     version: 5.0.5(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
   permissionless:
     specifier: ^0.1.30
-    version: 0.1.36(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)
+    version: 0.1.36(@lukasrosario/viem@2.17.4-sessionkeys.1)
   react:
     specifier: ^18.2.0
     version: 18.3.1
@@ -33,14 +33,14 @@ dependencies:
     specifier: ^9.0.1
     version: 9.0.1
   viem:
-    specifier: npm:@lukasrosario/viem@2.17.4-permissionedkeysalpha.6
-    version: /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3)
+    specifier: npm:@lukasrosario/viem@2.17.4-sessionkeys.1
+    version: /@lukasrosario/viem@2.17.4-sessionkeys.1(typescript@5.5.3)
   wagmi:
-    specifier: npm:@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.14
-    version: /@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.14(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
+    specifier: npm:@lukasrosario/wagmi@2.11.1-sessionkeys.2
+    version: /@lukasrosario/wagmi@2.11.1-sessionkeys.2(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
   webauthn-p256:
-    specifier: ^0.0.2
-    version: 0.0.2
+    specifier: npm:@lukasrosario/webauthn-p256@0.0.10-sessionkeys.2
+    version: /@lukasrosario/webauthn-p256@0.0.10-sessionkeys.2(typescript@5.5.3)
 
 devDependencies:
   '@biomejs/biome':
@@ -2282,8 +2282,8 @@ packages:
       '@lit-labs/ssr-dom-shim': 1.2.0
     dev: false
 
-  /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3):
-    resolution: {integrity: sha512-Zf2yVKuWOJiR7XKzwQKi/z+zxUVXM7otnG4yNdzTTZOEAP/dMAcv3ViGzQiaGUPpbpleRMYIwXRs6cwhIwKAjQ==}
+  /@lukasrosario/viem@2.17.4-sessionkeys.1(typescript@5.5.3):
+    resolution: {integrity: sha512-kItLXIzlgl22G4Uwl4MVXQpd2oPGBCgfJPgP2DBYD7B2BniC1KJ8z4z3q7ELSpP3mr0jYOBNGOcUXA6QXuIxJw==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -2305,8 +2305,8 @@ packages:
       - zod
     dev: false
 
-  /@lukasrosario/wagmi-connectors@5.0.25-permissionedkeysalpha.4(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
-    resolution: {integrity: sha512-Z+I3NhkjU+Z3vTf1FNfo7FtDmeWfCumBo4q+SvIBbATWbn1jIS4FFuXKKylIFAbQhDuFfATVxVOm++ohopMB7g==}
+  /@lukasrosario/wagmi-connectors@5.0.25-sessionkeys.1(@lukasrosario/viem@2.17.4-sessionkeys.1)(@lukasrosario/wagmi-core@2.12.1-sessionkeys.1)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
+    resolution: {integrity: sha512-WISxwKEvfT7MwbNR1u3UTrDuO5PlAi8lJGLf8xJ2BvbuKTYby0S44FeM5MGJVLgTh/EUu4a9kPuEC5QUq96K2g==}
     peerDependencies:
       '@wagmi/core': workspace:*
       typescript: '>=5.0.4'
@@ -2315,16 +2315,16 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@coinbase/wallet-sdk': /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.9(typescript@5.5.3)
+      '@coinbase/wallet-sdk': /@lukasrosario/wallet-sdk@4.1.0-sessionkeys.1(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
       '@metamask/sdk': 0.26.4(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
       '@safe-global/safe-apps-provider': 0.18.3(typescript@5.5.3)
       '@safe-global/safe-apps-sdk': 9.1.0(typescript@5.5.3)
-      '@wagmi/core': /@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)
+      '@wagmi/core': /@lukasrosario/wagmi-core@2.12.1-sessionkeys.1(@lukasrosario/viem@2.17.4-sessionkeys.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)
       '@walletconnect/ethereum-provider': 2.13.0(@types/react@18.3.3)(react@18.3.1)
       '@walletconnect/modal': 2.6.2(@types/react@18.3.3)(react@18.3.1)
       cbw-sdk: /@coinbase/wallet-sdk@3.9.3
       typescript: 5.5.3
-      viem: /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3)
+      viem: /@lukasrosario/viem@2.17.4-sessionkeys.1(typescript@5.5.3)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -2341,6 +2341,8 @@ packages:
       - '@vercel/kv'
       - bufferutil
       - encoding
+      - expo
+      - expo-web-browser
       - ioredis
       - react
       - react-dom
@@ -2352,12 +2354,12 @@ packages:
       - zod
     dev: false
 
-  /@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3):
-    resolution: {integrity: sha512-NKR0UtvZx/zqghwJo/xDTBfJj/sqJgPgRNRRWXKbDOpRLXp5JaHfn4bCyOwWSrmVsEyX4vGK4FOhechvrui/eA==}
+  /@lukasrosario/wagmi-core@2.12.1-sessionkeys.1(@lukasrosario/viem@2.17.4-sessionkeys.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3):
+    resolution: {integrity: sha512-ZdCYJGPBhBT7ro3960LQKiBnhzM8f5v6BJ4SrCed2ABVL9+0hg2i0ncUVa5RfGQZnOark+qGniMU6oIwYQwBGA==}
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
       typescript: '>=5.0.4'
-      viem: npm:@lukasrosario/viem@2.17.4-permissionedkeysalpha.6
+      viem: npm:@lukasrosario/viem@2.17.4-sessionkeys.1
     peerDependenciesMeta:
       '@tanstack/query-core':
         optional: true
@@ -2367,7 +2369,7 @@ packages:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.5.3)
       typescript: 5.5.3
-      viem: /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3)
+      viem: /@lukasrosario/viem@2.17.4-sessionkeys.1(typescript@5.5.3)
       zustand: 4.4.1(@types/react@18.3.3)(react@18.3.1)
     transitivePeerDependencies:
       - '@types/react'
@@ -2375,8 +2377,8 @@ packages:
       - react
     dev: false
 
-  /@lukasrosario/wagmi@2.11.1-permissionedkeysalpha.14(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
-    resolution: {integrity: sha512-3F3yd+rM8efnuXv6oNg6rlM96ay1EhQfDZbdHtvcI30ur7vAwWwKjY9n3+3BTczz+ezT/9XG4thPWGSrayTuWw==}
+  /@lukasrosario/wagmi@2.11.1-sessionkeys.2(@tanstack/react-query@5.0.5)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3):
+    resolution: {integrity: sha512-OjWnRVLwASCZWN8Khe0SXVhab6g5b0gFzOg99DXEob2b1Kr3fdAD/2uTQaKEUpleuwHs0gfKRuFLjw0mTRtITA==}
     peerDependencies:
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
@@ -2386,12 +2388,12 @@ packages:
         optional: true
     dependencies:
       '@tanstack/react-query': 5.0.5(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)
-      '@wagmi/connectors': /@lukasrosario/wagmi-connectors@5.0.25-permissionedkeysalpha.4(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
-      '@wagmi/core': /@lukasrosario/wagmi-core@2.12.1-permissionedkeysalpha.6(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)
+      '@wagmi/connectors': /@lukasrosario/wagmi-connectors@5.0.25-sessionkeys.1(@lukasrosario/viem@2.17.4-sessionkeys.1)(@lukasrosario/wagmi-core@2.12.1-sessionkeys.1)(@types/react@18.3.3)(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1)(typescript@5.5.3)
+      '@wagmi/core': /@lukasrosario/wagmi-core@2.12.1-sessionkeys.1(@lukasrosario/viem@2.17.4-sessionkeys.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)
       react: 18.3.1
       typescript: 5.5.3
       use-sync-external-store: 1.2.0(react@18.3.1)
-      viem: /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3)
+      viem: /@lukasrosario/viem@2.17.4-sessionkeys.1(typescript@5.5.3)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -2409,6 +2411,8 @@ packages:
       - '@vercel/kv'
       - bufferutil
       - encoding
+      - expo
+      - expo-web-browser
       - immer
       - ioredis
       - react-dom
@@ -2420,23 +2424,49 @@ packages:
       - zod
     dev: false
 
-  /@lukasrosario/wallet-sdk@4.0.4-permissionedkeysalpha.9(typescript@5.5.3):
-    resolution: {integrity: sha512-o+sE4EJ6TezNOSKw7Ikuc4LHiLiFAATaG3cPQRKpMS77GxzYIK+VseNIzCE+FFGepUe3PP6xOPE6JZZffCXwig==}
+  /@lukasrosario/wallet-sdk@4.1.0-sessionkeys.1(react-dom@18.3.1)(react-native@0.74.3)(react@18.3.1):
+    resolution: {integrity: sha512-YJ1VIp+I+fmc4nWK7tiu46w/xeLlCdUDec0gs7izg4JawcH6f2Ltj2kKmVRgCmFxvRPFbTesOu2/V1HOT2gvwA==}
+    peerDependencies:
+      '@react-native-async-storage/async-storage': '*'
+      expo: '*'
+      expo-web-browser: '*'
+      react: '*'
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      '@react-native-async-storage/async-storage':
+        optional: true
+      expo:
+        optional: true
+      expo-web-browser:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
     dependencies:
-      '@simplewebauthn/browser': 10.0.0
-      '@simplewebauthn/server': 10.0.0
-      buffer: 6.0.3
+      '@noble/ciphers': 0.5.3
+      '@noble/curves': 1.4.2
+      '@noble/hashes': 1.4.0
       clsx: 1.2.1
       eventemitter3: 5.0.1
-      idb: 8.0.0
-      keccak: 3.0.4
       preact: 10.22.1
-      sha.js: 2.4.11
-      viem: 2.18.0(typescript@5.5.3)(zod@3.23.8)
-      webauthn-p256: 0.0.2
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.3.3)(react@18.3.1)
+    dev: false
+
+  /@lukasrosario/webauthn-p256@0.0.10-sessionkeys.2(typescript@5.5.3):
+    resolution: {integrity: sha512-tmvCd1Pd7+FpptagIq0IgClnZLfb99swLSXw0ta4IU4965wCecCByCHuMzXOy31TqKKKkEv/1vwiNXBrp0NAHQ==}
+    dependencies:
+      '@noble/curves': 1.4.2
+      '@noble/hashes': 1.4.0
+      buffer: 6.0.3
+      viem: 2.20.0(typescript@5.5.3)(zod@3.23.8)
     transitivePeerDependencies:
       - bufferutil
-      - encoding
       - typescript
       - utf-8-validate
       - zod
@@ -2730,6 +2760,10 @@ packages:
     dependencies:
       '@motionone/dom': 10.18.0
       tslib: 2.6.3
+    dev: false
+
+  /@noble/ciphers@0.5.3:
+    resolution: {integrity: sha512-B0+6IIHiqEs3BPMT0hcRmHvEj2QHOLu+uwt+tqDDeVd0oyVzh7BPrDcPjRnV1PV/5LaknXJJQvOuRGR0zQJz+w==}
     dev: false
 
   /@noble/curves@1.4.0:
@@ -3347,7 +3381,7 @@ packages:
     resolution: {integrity: sha512-N5p/ulfnnA2Pi2M3YeWjULeWbjo7ei22JwU/IXnhoHzKq3pYCN6ynL9mJBOlvDVv892EgLPCWCOwQk/uBT2v0Q==}
     dependencies:
       '@safe-global/safe-gateway-typescript-sdk': 3.21.8
-      viem: 2.18.0(typescript@5.5.3)(zod@3.23.8)
+      viem: 2.20.0(typescript@5.5.3)(zod@3.23.8)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -3744,7 +3778,7 @@ packages:
       picomatch: 3.0.1
       prettier: 3.3.2
       typescript: 5.5.3
-      viem: 2.18.0(typescript@5.5.3)(zod@3.23.8)
+      viem: 2.20.0(typescript@5.5.3)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - bufferutil
@@ -5667,10 +5701,6 @@ packages:
     resolution: {integrity: sha512-8Sb3veuYCyrZL+VBt9LJfZjLUPWVvqn8tG28VqYNFCo43KHcKuq+b4EiXGeuaLAQWL2YmyDgMp2aSpH9JHsEQg==}
     dev: false
 
-  /idb@8.0.0:
-    resolution: {integrity: sha512-l//qvlAKGmQO31Qn7xdzagVPPaHTxXx199MhrAFuVBTPqydcPYBWjkrbv4Y0ktB+GmWOiwHl237UUOrLmQxLvw==}
-    dev: false
-
   /ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
@@ -7020,12 +7050,12 @@ packages:
   /pathe@1.1.2:
     resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
 
-  /permissionless@0.1.36(@lukasrosario/viem@2.17.4-permissionedkeysalpha.6):
+  /permissionless@0.1.36(@lukasrosario/viem@2.17.4-sessionkeys.1):
     resolution: {integrity: sha512-v+VMpkHX9wr13ZPV6nilwQ0yiFU1K4498j6ohmNzD2eLlP1R/FB77xQrbMkZo98ATYca2CYh2gcBYsxmOC3VmA==}
     peerDependencies:
       viem: ^2.14.1
     dependencies:
-      viem: /@lukasrosario/viem@2.17.4-permissionedkeysalpha.6(typescript@5.5.3)
+      viem: /@lukasrosario/viem@2.17.4-sessionkeys.1(typescript@5.5.3)
     dev: false
 
   /picocolors@1.0.1:
@@ -8385,8 +8415,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /viem@2.18.0(typescript@5.5.3)(zod@3.23.8):
-    resolution: {integrity: sha512-HA4Dj+PCNWvvZDThWcUPg0sjiS8uwGRaxs3CMBOASL/j0p2pD4nR9vY/y/pAiRr491hGCnrSCVCmb/qqA57wIw==}
+  /viem@2.20.0(typescript@5.5.3)(zod@3.23.8):
+    resolution: {integrity: sha512-cM4vs81HnSNbfceI1MLkx4pCVzbVjl9xiNSv5SCutYjUyFFOVSPDlEyhpg2iHinxx1NM4Qne3END5eLT8rvUdg==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -8457,13 +8487,6 @@ packages:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
     dependencies:
       defaults: 1.0.4
-
-  /webauthn-p256@0.0.2:
-    resolution: {integrity: sha512-IK526z2vBudb3oMT4vRYwelikKro3TxLqlPz4gyb1mXAp8XkHsUAjrTJlQA37HejsC1rWhCfYXWHPEkMJxZ4Xw==}
-    dependencies:
-      '@noble/curves': 1.4.2
-      '@noble/hashes': 1.4.0
-    dev: false
 
   /webauthn-p256@0.0.5:
     resolution: {integrity: sha512-drMGNWKdaixZNobeORVIqq7k5DsRC9FnG201K2QjeOoQLmtSDaSsVZdkg6n5jUALJKcAG++zBPJXmv6hy0nWFg==}
