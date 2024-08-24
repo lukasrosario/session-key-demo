@@ -1,21 +1,21 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
 import {
-  WalletClient,
   encodeFunctionData,
-  decodeAbiParameters,
   Hex,
   parseEther,
   parseUnits,
   toFunctionSelector,
 } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
-import { baseSepolia } from "viem/chains";
-import { useGrantPermissions } from "wagmi/experimental";
+import {
+  useCallsStatus,
+  useGrantPermissions,
+  useSendCalls,
+} from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
 import { createCredential } from "webauthn-p256";
 import { P256Credential } from "webauthn-p256";
-import { prepareCalls, sendCalls } from "viem/experimental";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -29,7 +29,15 @@ function App() {
   const { connectors, connect } = useConnect();
   const { data: walletClient } = useWalletClient({ chainId: 84532 });
   const [submitted, setSubmitted] = useState(false);
-  const [userOpHash, setUserOpHash] = useState<string>();
+  const [callsId, setCallsId] = useState<string>();
+  const { data: callsStatus } = useCallsStatus({
+    id: callsId as string,
+    query: {
+      enabled: !!callsId,
+      refetchInterval: (data) =>
+        data.state.data?.status === "PENDING" ? 200 : false,
+    },
+  });
   const [permissionsContext, setPermissionsContext] = useState<
     Hex | undefined
   >();
@@ -37,6 +45,7 @@ function App() {
   const [credential, setCredential] = useState<
     undefined | P256Credential<"cryptokey">
   >();
+  const { sendCallsAsync } = useSendCalls();
 
   async function grantPermissions() {
     if (account.address) {
@@ -88,28 +97,9 @@ function App() {
   const buy = async () => {
     if (account.address && permissionsContext && credential && walletClient) {
       setSubmitted(true);
-      setUserOpHash(undefined);
+      setCallsId(undefined);
       try {
-        const preparedCalls = await prepareCalls(walletClient as WalletClient, {
-          account: account.address,
-          calls: [
-            {
-              to: clickAddress,
-              value: parseUnits("0", 18),
-              data: clickData,
-              chainId: baseSepolia.id,
-            },
-          ],
-          capabilities: {
-            permissions: {
-              context: permissionsContext,
-            },
-          },
-        });
-        const signature = await credential.sign(preparedCalls[0].hash);
-        const callsId = await sendCalls(walletClient as WalletClient, {
-          account: account.address,
-          chain: baseSepolia,
+        const callsId = await sendCallsAsync({
           calls: [
             {
               to: clickAddress,
@@ -120,20 +110,18 @@ function App() {
           capabilities: {
             permissions: {
               context: permissionsContext,
-              preparedCalls: [{ ...preparedCalls[0], signature }],
+            },
+          },
+          prepareAndSign: true,
+          sign: credential.sign,
+          signatureData: {
+            type: "permissions",
+            values: {
+              context: permissionsContext,
             },
           },
         });
-        if (callsId) {
-          const [userOpHash] = decodeAbiParameters(
-            [
-              { name: "userOpHash", type: "bytes32" },
-              { name: "chainId", type: "uint256" },
-            ],
-            callsId as Hex,
-          );
-          setUserOpHash(userOpHash);
-        }
+        setCallsId(callsId);
       } catch (e: any) {
         console.error(e);
       }
@@ -189,9 +177,9 @@ function App() {
           </>
         )}
         {/* {!account.address && <h2 className="text-xl">Session key demo</h2>} */}
-        {userOpHash && (
+        {callsStatus && callsStatus.status === "CONFIRMED" && (
           <a
-            href={`https://base-sepolia.blockscout.com/op/${userOpHash}`}
+            href={`https://base-sepolia.blockscout.com/tx/${callsStatus.receipts?.[0].transactionHash}`}
             target="_blank"
             className="absolute top-8 hover:underline"
           >
