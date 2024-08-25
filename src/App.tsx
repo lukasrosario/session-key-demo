@@ -168,7 +168,10 @@ function App() {
                   className="bg-white text-black p-2 rounded-lg w-36 text-lg disabled:bg-gray-400"
                   type="button"
                   onClick={buy}
-                  disabled={submitted}
+                  disabled={
+                    submitted ||
+                    (!!callsId && !(callsStatus?.status === "CONFIRMED"))
+                  }
                 >
                   Buy
                 </button>
