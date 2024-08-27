@@ -66,7 +66,7 @@ function App() {
               {
                 type: "native-token-recurring-allowance",
                 data: {
-                  allowance: parseEther("3"),
+                  allowance: parseEther("0.1"),
                   start: Math.floor(Date.now() / 1000),
                   period: 86400,
                 },

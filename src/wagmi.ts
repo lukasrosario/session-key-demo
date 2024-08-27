@@ -5,7 +5,7 @@ import { coinbaseWallet } from 'wagmi/connectors'
 export const config = createConfig({
   chains: [baseSepolia],
   connectors: [
-    coinbaseWallet({ appName: 'Permissions', preference: "smartWalletOnly" }),
+    coinbaseWallet({ appName: 'Demo App', preference: "smartWalletOnly" }),
   ],
   transports: {
     [baseSepolia.id]: http(),
