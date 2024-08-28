@@ -1,12 +1,6 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
-import {
-  encodeFunctionData,
-  Hex,
-  parseEther,
-  parseUnits,
-  toFunctionSelector,
-} from "viem";
+import { encodeFunctionData, Hex, parseEther, toFunctionSelector } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import {
   useCallsStatus,
@@ -14,8 +8,11 @@ import {
   useSendCalls,
 } from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
-import { createCredential } from "webauthn-p256";
-import { P256Credential } from "webauthn-p256";
+import {
+  createCredential,
+  P256Credential,
+  signWithCredential,
+} from "webauthn-p256";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -103,7 +100,7 @@ function App() {
           calls: [
             {
               to: clickAddress,
-              value: parseUnits("0", 18),
+              value: BigInt(0),
               data: clickData,
             },
           ],
@@ -112,14 +109,7 @@ function App() {
               context: permissionsContext,
             },
           },
-          prepareAndSign: true,
-          sign: credential.sign,
-          signatureData: {
-            type: "permissions",
-            values: {
-              context: permissionsContext,
-            },
-          },
+          signatureOverride: signWithCredential(credential),
         });
         setCallsId(callsId);
       } catch (e: any) {
