@@ -54,8 +54,9 @@ function App() {
             chainId: 84532,
             expiry: 17218875770,
             signer: {
-              type: "p256",
+              type: "key",
               data: {
+                type: 'secp256r1',
                 publicKey: newCredential.publicKey,
               },
             },
