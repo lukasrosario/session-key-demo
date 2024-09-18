@@ -106,6 +106,9 @@ function App() {
             },
           ],
           capabilities: {
+            paymasterService: {
+              url: import.meta.env.VITE_PAYMASTER_URL
+            },
             permissions: {
               context: permissionsContext,
             },
