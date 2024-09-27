@@ -10,18 +10,15 @@ import {
 import { hashMessage, hashTypedData } from 'viem';
 import type { WebAuthnAccount } from 'viem/account-abstraction';
 
-export type ToP256AccountParameters = {
-  publicKey: PublicKey.PublicKey;
-  privateKey: CryptoKey;
-};
-
 const authenticatorData =
   '0x49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97630500000000' as const;
 
-export function toP256Account(
-  parameters: ToP256AccountParameters
-): WebAuthnAccount {
-  const { privateKey, publicKey } = parameters;
+export async function toP256Account(): Promise<WebAuthnAccount> {
+
+  const keypair = await WebCryptoP256.createKeyPair({ extractable: false });
+  const { privateKey, publicKey } = keypair;
+
+  // TODO manage IndexedDB storage for CryptoKey
 
   const sign = async (payload: Hex.Hex) => {
     const challengeBase64 = Base64.fromHex(payload, { url: true, pad: false });

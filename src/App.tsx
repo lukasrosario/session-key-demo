@@ -16,6 +16,8 @@ import { clickAbi } from "./abi/Click";
 import { recurringAllowanceManagerAbi, recurringAllowanceManagerAddress } from "./abi/RecurringAllowanceManager";
 import { useLocalAccount } from "./headless/useLocalAccount";
 import { prepareCalls, sendPreparedCalls } from "viem/experimental";
+import { toP256Account } from "./headless/toP256Account";
+import { toServerAccount } from "./headless/toServerAccount";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -49,9 +51,8 @@ function App() {
   // >();
   const { sendCallsAsync } = useSendCalls();
 
-  const {localAccount, localWalletClient, createLocalAccount} = useLocalAccount()
+  const {localAccount, createLocalAccount} = useLocalAccount()
   console.log({localAccount})
-  console.log({localWalletClient})
   console.log({account})
 
   console.log({permissionsContext})
@@ -84,7 +85,8 @@ function App() {
     if (account.address) {
       let localAccountAddress: Address
       if (!localAccount) {
-        localAccountAddress = (await createLocalAccount(account.address)).address
+        localAccountAddress = (await createLocalAccount({linkedAccount: account.address, createLocalOwner: async () => await toP256Account()})).address
+        // localAccountAddress = (await createLocalAccount({linkedAccount: account.address, createLocalOwner: async () => toServerAccount({address: "0xAda9897F517018cc51831B9691F0e94b50df50B8", endpoint: "http://localhost:3000"})})).address
       } else {
         localAccountAddress = localAccount.address
       }
@@ -140,7 +142,7 @@ function App() {
   };
 
   const buy = async () => {
-    if (account.address && permissionsContext && localAccount && localWalletClient && walletClient) {
+    if (account.address && permissionsContext && localAccount && walletClient) {
       setSubmitted(true);
       setCallsId(undefined);
       try {
