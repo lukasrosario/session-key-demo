@@ -78,6 +78,8 @@ function App() {
     )
   }
 
+  console.log({accountAddress: account.address})
+
   async function grantPermissions() {
     if (account.address) {
       let localAccountAddress: Address
@@ -148,12 +150,11 @@ function App() {
             {
               from: localAccount.address,
               calls: [
-                // TODO: withdraws currently failing, need to debug
-                // {
-                //   to: recurringAllowanceManagerAddress,
-                //   value: "0x0",
-                //   data: encodeFunctionData({abi: recurringAllowanceManagerAbi, functionName: "withdraw", args: [permissionsContext, account.address, ALLOWANCE / BigInt(10)]})
-                // },
+                {
+                  to: recurringAllowanceManagerAddress,
+                  value: "0x0",
+                  data: encodeFunctionData({abi: recurringAllowanceManagerAbi, functionName: "withdraw", args: [permissionsContext, account.address, BigInt(1)]})
+                },
                 {
                   to: clickAddress,
                   value: "0x0",
