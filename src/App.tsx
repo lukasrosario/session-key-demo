@@ -1,6 +1,6 @@
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import { useState } from "react";
-import { encodeFunctionData, Hex, parseEther, toFunctionSelector } from "viem";
+import { Address, createWalletClient, encodeAbiParameters, encodeFunctionData, Hex, parseEther, toFunctionSelector, toHex, zeroAddress } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import {
   useCallsStatus,
@@ -8,11 +8,16 @@ import {
   useSendCalls,
 } from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
-import {
-  createCredential,
-  P256Credential,
-  signWithCredential,
-} from "webauthn-p256";
+// import {
+//   createCredential,
+//   P256Credential,
+//   signWithCredential,
+// } from "webauthn-p256";
+import { recurringAllowanceManagerAbi, recurringAllowanceManagerAddress } from "./abi/RecurringAllowanceManager";
+import { useLocalAccount } from "./headless/useLocalAccount";
+import { prepareCalls, sendPreparedCalls } from "viem/experimental";
+import { toP256Account } from "./headless/toP256Account";
+import { toServerAccount } from "./headless/toServerAccount";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -20,6 +25,8 @@ const clickData = encodeFunctionData({
   functionName: "click",
   args: [],
 });
+
+const ALLOWANCE = parseEther("0.1");
 
 function App() {
   const account = useAccount();
@@ -39,25 +46,68 @@ function App() {
     Hex | undefined
   >();
   const { grantPermissionsAsync } = useGrantPermissions();
-  const [credential, setCredential] = useState<
-    undefined | P256Credential<"cryptokey">
-  >();
+  // const [credential, setCredential] = useState<
+  //   undefined | P256Credential<"cryptokey">
+  // >();
   const { sendCallsAsync } = useSendCalls();
+
+  const {localAccount, createLocalAccount} = useLocalAccount()
+  console.log({localAccount})
+  console.log({account})
+
+  console.log({permissionsContext})
+
+  function wrapSignature(ownerIndex: number, signatureData: Hex) {
+    const signatureWrapperStruct = {
+      name: 'SignatureWrapper',
+      type: 'tuple',
+      components: [
+        {
+          name: 'ownerIndex',
+          type: 'uint8',
+        },
+        {
+          name: 'signatureData',
+          type: 'bytes',
+        },
+      ],
+    } as const;
+
+    return encodeAbiParameters(
+      [signatureWrapperStruct], 
+      [{ownerIndex, signatureData}]
+    )
+  }
+
+  console.log({accountAddress: account.address})
 
   async function grantPermissions() {
     if (account.address) {
-      const newCredential = await createCredential({ type: "cryptoKey" });
+      let localAccountAddress: Address
+      if (!localAccount) {
+        localAccountAddress = (await createLocalAccount({linkedAccount: account.address, createLocalOwner: async () => await toP256Account()})).address
+        // localAccountAddress = (await createLocalAccount({linkedAccount: account.address, createLocalOwner: async () => toServerAccount({address: "0xAda9897F517018cc51831B9691F0e94b50df50B8", endpoint: "http://localhost:3000"})})).address
+      } else {
+        localAccountAddress = localAccount.address
+      }
       const response = await grantPermissionsAsync({
         permissions: [
           {
             address: account.address,
             chainId: 84532,
             expiry: 17218875770,
+            // signer: {
+            //   type: "key",
+            //   data: {
+            //     type: 'secp256r1',
+            //     publicKey: newCredential.publicKey,
+            //   },
+            // },
             signer: {
-              type: "key",
+              type: "account",
               data: {
-                type: 'secp256r1',
-                publicKey: newCredential.publicKey,
+                address: localAccountAddress
+                // address: "0x0BFc799dF7e440b7C88cC2454f12C58f8a29D986"
               },
             },
             permissions: [
@@ -84,7 +134,6 @@ function App() {
       });
       const context = response[0].context as Hex;
       setPermissionsContext(context);
-      setCredential(newCredential);
     }
   }
 
@@ -93,28 +142,85 @@ function App() {
   };
 
   const buy = async () => {
-    if (account.address && permissionsContext && credential && walletClient) {
+    if (account.address && permissionsContext && localAccount && walletClient) {
       setSubmitted(true);
       setCallsId(undefined);
       try {
-        const callsId = await sendCallsAsync({
-          calls: [
+        const prepared = await walletClient.request({
+          method: 'wallet_prepareCalls',
+          params: [
             {
-              to: clickAddress,
-              value: BigInt(0),
-              data: clickData,
+              from: localAccount.address,
+              calls: [
+                {
+                  to: recurringAllowanceManagerAddress,
+                  value: "0x0",
+                  data: encodeFunctionData({abi: recurringAllowanceManagerAbi, functionName: "withdraw", args: [permissionsContext, account.address, BigInt(1)]})
+                },
+                {
+                  to: clickAddress,
+                  value: "0x0",
+                  data: clickData,
+                },
+              ],
+              chainId: toHex(84532),
+              capabilities: {
+                paymasterService: {
+                  url: import.meta.env.VITE_PAYMASTER_URL
+                },
+                permissions: {
+                  context: permissionsContext,
+                },
+                initialization: localAccount.initialization
+              },
+              version: "1.0",
             },
-          ],
-          capabilities: {
-            paymasterService: {
-              url: import.meta.env.VITE_PAYMASTER_URL
+          ]
+        })
+        console.log({prepared})
+        const signature = await localAccount.signUserOperation?.(prepared[0].preparedCalls.data)
+        console.log({signature})
+
+        const callsId = await walletClient.request({
+          method: 'wallet_sendPreparedCalls',
+          params: [
+            {
+              from: localAccount.address,
+              version: "1.0",
+              preparedCalls: {...prepared[0].preparedCalls, values: {}}, // fake values to ignore linter
+              context: prepared[0].context,
+              signature,
+              chainId: toHex(84532),
             },
-            permissions: {
-              context: permissionsContext,
-            },
-          },
-          signatureOverride: signWithCredential(credential),
-        });
+          ]
+        })
+        console.log({callsId})
+
+        // const callsId = await sendCallsAsync({
+        //   account: localAccount,
+        //   connector: connectors[0],
+        //   calls: [
+        //     {
+        //       to: recurringAllowanceManagerAddress,
+        //       value: BigInt(0),
+        //       data: encodeFunctionData({abi: recurringAllowanceManagerAbi, functionName: "withdraw", args: [permissionsContext, account.address, ALLOWANCE / BigInt(10)]})
+        //     },
+        //     {
+        //       to: clickAddress,
+        //       value: BigInt(0),
+        //       data: clickData,
+        //     },
+        //   ],
+        //   capabilities: {
+        //     paymasterService: {
+        //       url: import.meta.env.VITE_PAYMASTER_URL
+        //     },
+        //     permissions: {
+        //       context: permissionsContext,
+        //     },
+        //   },
+        //   // signatureOverride: signLocal(credential),
+        // });
         setCallsId(callsId);
       } catch (e: any) {
         console.error(e);
