@@ -1,6 +1,6 @@
-import { useAccount, useConnect, useWalletClient } from "wagmi";
+import { useAccount, useConnect, useSignTypedData, useWalletClient } from "wagmi";
 import { useState } from "react";
-import { encodeFunctionData, Hex, parseEther, toFunctionSelector } from "viem";
+import { Address, createWalletClient, encodeAbiParameters, encodeFunctionData, Hex, parseEther, toFunctionSelector, toHex, zeroAddress } from "viem";
 import { truncateMiddle } from "./util/truncateMiddle";
 import {
   useCallsStatus,
@@ -8,11 +8,17 @@ import {
   useSendCalls,
 } from "wagmi/experimental";
 import { clickAbi } from "./abi/Click";
-import {
-  createCredential,
-  P256Credential,
-  signWithCredential,
-} from "webauthn-p256";
+// import {
+//   createCredential,
+//   P256Credential,
+//   signWithCredential,
+// } from "webauthn-p256";
+import { recurringAllowanceManagerAbi, recurringAllowanceManagerAddress } from "./abi/RecurringAllowanceManager";
+import { useLocalAccount } from "./headless/useLocalAccount";
+import { prepareCalls, sendPreparedCalls } from "viem/experimental";
+import { toP256Account } from "./headless/toP256Account";
+import { toServerAccount } from "./headless/toServerAccount";
+import { spendPermissions, spendPermissionsAbi } from "./abi/SpendPermissions";
 
 const clickAddress = "0x8Af2FA0c32891F1b32A75422eD3c9a8B22951f2F";
 const clickData = encodeFunctionData({
@@ -20,6 +26,8 @@ const clickData = encodeFunctionData({
   functionName: "click",
   args: [],
 });
+
+const ALLOWANCE = parseEther("0.1");
 
 function App() {
   const account = useAccount();
@@ -38,53 +46,127 @@ function App() {
   const [permissionsContext, setPermissionsContext] = useState<
     Hex | undefined
   >();
+  const [spendPermission, setSpendPermission] = useState<any>();
+  const [signature, setSignature] = useState<Hex>();
+
+  console.log({spendPermission})
+  console.log({signature})
   const { grantPermissionsAsync } = useGrantPermissions();
-  const [credential, setCredential] = useState<
-    undefined | P256Credential<"cryptokey">
-  >();
+  // const [credential, setCredential] = useState<
+  //   undefined | P256Credential<"cryptokey">
+  // >();
   const { sendCallsAsync } = useSendCalls();
+
+  const {localAccount, createLocalAccount} = useLocalAccount()
+  // console.log({localAccount})
+  // console.log({account})
+
+  // console.log({permissionsContext})
+
+  function wrapSignature(ownerIndex: number, signatureData: Hex) {
+    const signatureWrapperStruct = {
+      name: 'SignatureWrapper',
+      type: 'tuple',
+      components: [
+        {
+          name: 'ownerIndex',
+          type: 'uint8',
+        },
+        {
+          name: 'signatureData',
+          type: 'bytes',
+        },
+      ],
+    } as const;
+
+    return encodeAbiParameters(
+      [signatureWrapperStruct], 
+      [{ownerIndex, signatureData}]
+    )
+  }
+
+  const {signTypedDataAsync} = useSignTypedData()
+
+  // console.log({accountAddress: account.address})
 
   async function grantPermissions() {
     if (account.address) {
-      const newCredential = await createCredential({ type: "cryptoKey" });
-      const response = await grantPermissionsAsync({
-        permissions: [
-          {
-            address: account.address,
-            chainId: 84532,
-            expiry: 17218875770,
-            signer: {
-              type: "key",
-              data: {
-                type: 'secp256r1',
-                publicKey: newCredential.publicKey,
-              },
-            },
-            permissions: [
-              {
-                type: "native-token-recurring-allowance",
-                data: {
-                  allowance: parseEther("0.1"),
-                  start: Math.floor(Date.now() / 1000),
-                  period: 86400,
-                },
-              },
-              {
-                type: "allowed-contract-selector",
-                data: {
-                  contract: clickAddress,
-                  selector: toFunctionSelector(
-                    "permissionedCall(bytes calldata call)",
-                  ),
-                },
-              },
-            ],
-          },
-        ],
-      });
-      const context = response[0].context as Hex;
-      setPermissionsContext(context);
-      setCredential(newCredential);
+      let localAccountAddress: Address
+      if (!localAccount) {
+        localAccountAddress = (await createLocalAccount({linkedAccount: account.address, createLocalOwner: async () => await toP256Account()})).address
+        // localAccountAddress = (await createLocalAccount({linkedAccount: account.address, createLocalOwner: async () => toServerAccount({address: "0xAda9897F517018cc51831B9691F0e94b50df50B8", endpoint: "http://localhost:3000"})})).address
+      } else {
+        localAccountAddress = localAccount.address
+      }
+      const spendPermission = {
+        account: account.address,
+          spender: localAccountAddress,
+          token: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as Address,
+          start: Math.floor(Date.now() / 1000),
+          end: Math.floor(Date.now() / 1000) + 86400,
+          period: 86400,
+          allowance: parseEther("0.1")
+      }
+      const signature = await signTypedDataAsync({
+        domain: {
+          name: "SpendPermissions",
+          version: "1",
+          verifyingContract: "0x8C9ba6B46d40fe3E19Ce2700Dd760a2dE1996987",
+          chainId: 84532
+        },
+        types: {
+          SpendPermission: [{"name":"account","type":"address","internalType":"address"},{"name":"spender","type":"address","internalType":"address"},{"name":"token","type":"address","internalType":"address"},{"name":"start","type":"uint48","internalType":"uint48"},{"name":"end","type":"uint48","internalType":"uint48"},{"name":"period","type":"uint48","internalType":"uint48"},{"name":"allowance","type":"uint160","internalType":"uint160"}]
+        },
+        primaryType: 'SpendPermission',
+        message: spendPermission
+      })
+      setSpendPermission(spendPermission)
+      setSignature(signature)
+
+      // const response = await grantPermissionsAsync({
+      //   permissions: [
+      //     {
+      //       address: account.address,
+      //       chainId: 84532,
+      //       expiry: 17218875770,
+      //       // signer: {
+      //       //   type: "key",
+      //       //   data: {
+      //       //     type: 'secp256r1',
+      //       //     publicKey: newCredential.publicKey,
+      //       //   },
+      //       // },
+      //       signer: {
+      //         type: "account",
+      //         data: {
+      //           address: localAccountAddress
+      //           // address: "0x0BFc799dF7e440b7C88cC2454f12C58f8a29D986"
+      //         },
+      //       },
+      //       permissions: [
+      //         {
+      //           type: "native-token-recurring-allowance",
+      //           data: {
+      //             allowance: parseEther("0.1"),
+      //             start: Math.floor(Date.now() / 1000),
+      //             period: 86400,
+      //           },
+      //         },
+      //         {
+      //           type: "allowed-contract-selector",
+      //           data: {
+      //             contract: clickAddress,
+      //             selector: toFunctionSelector(
+      //               "permissionedCall(bytes calldata call)",
+      //             ),
+      //           },
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // });
+      // const context = response[0].context as Hex;
+      // setPermissionsContext(context);
     }
   }
 
@@ -93,28 +175,90 @@ function App() {
   };
 
   const buy = async () => {
-    if (account.address && permissionsContext && credential && walletClient) {
+    if (account.address && spendPermission && signature && localAccount && walletClient) {
       setSubmitted(true);
       setCallsId(undefined);
       try {
-        const callsId = await sendCallsAsync({
-          calls: [
+        const prepared = await walletClient.request({
+          method: 'wallet_prepareCalls',
+          params: [
             {
-              to: clickAddress,
-              value: BigInt(0),
-              data: clickData,
+              from: localAccount.address,
+              calls: [
+                {
+                  to: spendPermissions,
+                  value: "0x0",
+                  data: encodeFunctionData({abi: spendPermissionsAbi, functionName: "permit", args: [spendPermission, signature]})
+                },
+                {
+                  to: spendPermissions,
+                  value: "0x0",
+                  data: encodeFunctionData({abi: spendPermissionsAbi, functionName: "spend", args: [spendPermission, localAccount.address, BigInt(1)]})
+                },
+                {
+                  to: clickAddress,
+                  value: toHex(1),
+                  data: clickData,
+                },
+              ],
+              chainId: toHex(84532),
+              capabilities: {
+                paymasterService: {
+                  url: import.meta.env.VITE_PAYMASTER_URL
+                },
+                permissions: {
+                  context: permissionsContext,
+                },
+                initialization: localAccount.initialization
+              },
+              version: "1.0",
             },
-          ],
-          capabilities: {
-            paymasterService: {
-              url: import.meta.env.VITE_PAYMASTER_URL
+          ]
+        })
+        console.log({prepared})
+        const userOpSignature = await localAccount.signUserOperation?.(prepared[0].preparedCalls.data)
+        console.log({signature})
+
+        const callsId = await walletClient.request({
+          method: 'wallet_sendPreparedCalls',
+          params: [
+            {
+              from: localAccount.address,
+              version: "1.0",
+              preparedCalls: {...prepared[0].preparedCalls, values: {}}, // fake values to ignore linter
+              context: prepared[0].context,
+              signature: userOpSignature,
+              chainId: toHex(84532),
             },
-            permissions: {
-              context: permissionsContext,
-            },
-          },
-          signatureOverride: signWithCredential(credential),
-        });
+          ]
+        })
+        console.log({callsId})
+
+        // const callsId = await sendCallsAsync({
+        //   account: localAccount,
+        //   connector: connectors[0],
+        //   calls: [
+        //     {
+        //       to: recurringAllowanceManagerAddress,
+        //       value: BigInt(0),
+        //       data: encodeFunctionData({abi: recurringAllowanceManagerAbi, functionName: "withdraw", args: [permissionsContext, account.address, ALLOWANCE / BigInt(10)]})
+        //     },
+        //     {
+        //       to: clickAddress,
+        //       value: BigInt(0),
+        //       data: clickData,
+        //     },
+        //   ],
+        //   capabilities: {
+        //     paymasterService: {
+        //       url: import.meta.env.VITE_PAYMASTER_URL
+        //     },
+        //     permissions: {
+        //       context: permissionsContext,
+        //     },
+        //   },
+        //   // signatureOverride: signLocal(credential),
+        // });
         setCallsId(callsId);
       } catch (e: any) {
         console.error(e);
@@ -145,7 +289,7 @@ function App() {
           <h2 className="text-xl">Permissions demo</h2>
         ) : (
           <>
-            {!permissionsContext ? (
+            {!signature ? (
               <>
                 <button
                   className="bg-white text-black p-2 rounded-lg w-fit text-lg disabled:bg-gray-400"
